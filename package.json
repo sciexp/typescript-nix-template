@@ -9,7 +9,11 @@
     "preview": "astro build && wrangler dev",
     "astro": "astro",
     "deploy": "astro build && wrangler deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "format": "biome format --write",
+    "lint": "biome lint",
+    "check": "biome check",
+    "check:fix": "biome check --write"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.9",
@@ -20,6 +24,10 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
     "@types/node": "^24.6.2",
+    "vite": "npm:rolldown-vite@latest",
     "wrangler": "^4.42.0"
+  },
+  "overrides": {
+    "vite": "npm:rolldown-vite@latest"
   }
 }
