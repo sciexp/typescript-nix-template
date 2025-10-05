@@ -44,6 +44,21 @@ All commands are run from the root of the project, from a terminal:
 | `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `bun astro -- --help` | Get help using the Astro CLI                     |
 
+## 🧪 Testing
+
+This project includes comprehensive testing with Vitest and Playwright.
+
+| Command                 | Action                                    |
+| :---------------------- | :---------------------------------------- |
+| `just test`             | Run all tests (unit + E2E)                |
+| `just test-unit`        | Run unit tests with Vitest                |
+| `just test-e2e`         | Run E2E tests with Playwright             |
+| `just test-watch`       | Run Vitest in watch mode                  |
+| `just test-ui`          | Run Playwright in UI mode                 |
+| `just test-coverage`    | Generate test coverage report             |
+
+For detailed testing documentation, see [TESTING.md](./TESTING.md).
+
 ## 👀 Want to learn more?
 
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+Check out [Starlight's docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
