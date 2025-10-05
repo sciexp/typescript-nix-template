@@ -17,10 +17,22 @@
           name = "test-starlight-dev";
           inputsFrom = [ config.pre-commit.devShell ];
           packages = with pkgs; [
+            # Core development tools
             bun
             nodejs
             just
             git
+
+            # Secrets management
+            age
+            sops
+            ssh-to-age
+
+            # CI/CD tools
+            gh
+            act
+
+            # Git environment setup
             config.packages.set-git-env
           ];
 
