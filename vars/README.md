@@ -71,7 +71,7 @@ After encrypting `shared.yaml`, upload the CI_AGE_KEY to GitHub:
 gh secret set SOPS_AGE_KEY < <(sops --decrypt --extract '["CI_AGE_KEY"]' vars/shared.yaml)
 ```
 
-Or manually at: https://github.com/YOUR_USERNAME/test-starlight/settings/secrets/actions
+Or manually at: https://github.com/YOUR_USERNAME/starlight-nix-template/settings/secrets/actions
 
 ## Security Notes
 
