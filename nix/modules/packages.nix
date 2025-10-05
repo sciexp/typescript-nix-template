@@ -28,6 +28,7 @@
             pkg-config
           ];
 
+          makeCacheWritable = true;
           npmDepsHash = "sha256-s+92bFThXcAqIFqfiMgp2WRvtiI+svd4kZRUffKoJ+s=";
 
           installPhase = ''
