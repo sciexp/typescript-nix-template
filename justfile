@@ -10,6 +10,21 @@ default:
 
 ## CI/CD
 
+# Format code with Biome
+[group('CI/CD')]
+format:
+  bun run format
+
+# Lint code with Biome
+[group('CI/CD')]
+lint:
+  bun run lint
+
+# Check and fix code with Biome
+[group('CI/CD')]
+check:
+  bun run check:fix
+
 # Run pre-commit hooks
 [group('CI/CD')]
 pre-commit:
