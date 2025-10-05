@@ -15,7 +15,7 @@
       pre-commit.settings = {
         hooks = {
           nixfmt-rfc-style.enable = true;
-          prettier.enable = true;
+          biome.enable = true;
         };
       };
     };
