@@ -2,7 +2,7 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "test-starlight",
+      "name": "starlight-nix-template",
       "dependencies": {
         "@astrojs/cloudflare": "^12.6.9",
         "@astrojs/starlight": "^0.36.0",
