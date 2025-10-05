@@ -15,7 +15,7 @@ Rolldown's bundler generates runtime code that uses Node.js's `createRequire(imp
 
 ### Error
 ```
-✘ [ERROR] service core:user:test-starlight: Uncaught TypeError:
+✘ [ERROR] service core:user:starlight-nix-template: Uncaught TypeError:
 The argument 'path' must be a file URL object, a file URL string, or an absolute path string.
 Received 'undefined'
 

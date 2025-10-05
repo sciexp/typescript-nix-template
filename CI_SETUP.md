@@ -87,7 +87,7 @@ sops --decrypt --extract '["CI_AGE_KEY"]' vars/shared.yaml | gh secret set SOPS_
 Or manually:
 1. Decrypt the file: `sops vars/shared.yaml`
 2. Copy the `CI_AGE_KEY` value
-3. Go to https://github.com/YOUR_USERNAME/test-starlight/settings/secrets/actions
+3. Go to https://github.com/YOUR_USERNAME/starlight-nix-template/settings/secrets/actions
 4. Click "New repository secret"
 5. Name: `SOPS_AGE_KEY`
 6. Value: Paste the age private key
@@ -97,14 +97,14 @@ Or manually:
 
 If using Cachix, set these as repository variables (not secrets):
 
-1. Go to https://github.com/YOUR_USERNAME/test-starlight/settings/variables/actions
+1. Go to https://github.com/YOUR_USERNAME/starlight-nix-template/settings/variables/actions
 2. Add variable `CACHIX_CACHE_NAME` with your cache name
 
 Alternatively, the workflow will read from the encrypted `vars/shared.yaml`.
 
 ### 2.3 Configure Production Environment
 
-1. Go to https://github.com/YOUR_USERNAME/test-starlight/settings/environments
+1. Go to https://github.com/YOUR_USERNAME/starlight-nix-template/settings/environments
 2. Click "New environment"
 3. Name: `production`
 4. Add protection rules as desired (e.g., required reviewers)
@@ -147,7 +147,7 @@ The workflow should complete these jobs in order:
 
 If deployment succeeded, verify at:
 - Cloudflare Dashboard: https://dash.cloudflare.com/
-- Your Workers URL: https://test-starlight.YOUR_SUBDOMAIN.workers.dev
+- Your Workers URL: https://starlight-nix-template.YOUR_SUBDOMAIN.workers.dev
 
 Or the URL shown in the workflow deployment step.
 

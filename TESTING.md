@@ -1,6 +1,6 @@
 # Testing Guide
 
-Comprehensive testing documentation for the test-starlight project.
+Comprehensive testing documentation for the starlight-nix-template project.
 
 ## Overview
 
@@ -36,7 +36,7 @@ just test-coverage
 ## Test Structure
 
 ```
-test-starlight/
+starlight-nix-template/
 ├── src/
 │   ├── components/
 │   │   ├── Card.astro
