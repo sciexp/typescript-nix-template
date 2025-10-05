@@ -3,6 +3,7 @@
 import cloudflare from "@astrojs/cloudflare";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
+import * as vite from "vite";
 
 // https://astro.build/config
 export default defineConfig({
@@ -39,4 +40,18 @@ export default defineConfig({
 
     imageService: "cloudflare",
   }),
+
+  vite: {
+    // Fix for rolldown-vite compatibility with Cloudflare Workers
+    // https://github.com/cloudflare/workers-sdk/pull/9891
+    ...("rolldownVersion" in vite
+      ? {
+          optimizeDeps: {
+            esbuildOptions: {
+              platform: "neutral",
+            },
+          },
+        }
+      : {}),
+  },
 });
