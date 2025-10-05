@@ -336,7 +336,7 @@ sops-add-key:
   chmod 600 ~/.config/sops/age/keys.txt
 
   # Prompt for key description
-  printf "Enter age key description (e.g., 'test-starlight [dev|ci]'): "
+  printf "Enter age key description (e.g., 'starlight-nix-template [dev|ci]'): "
   read -r key_description
   [[ -z "${key_description}" ]] && { echo "❌ Description cannot be empty"; exit 1; }
 

@@ -1,5 +1,5 @@
 {
-  "name": "test-starlight",
+  "name": "starlight-nix-template",
   "type": "module",
   "version": "0.0.1",
   "scripts": {

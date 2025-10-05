@@ -222,7 +222,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://test-starlight.pages.dev
+      url: https://starlight-nix-template.pages.dev
     concurrency:
       group: deploy-${{ github.workflow }}-${{ github.ref_name }}
       cancel-in-progress: false

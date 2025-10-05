@@ -1,5 +1,5 @@
 {
-  description = "test-starlight documentation site with Astro Starlight and Bun";
+  description = "starlight-nix-template documentation site with Astro Starlight and Bun";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

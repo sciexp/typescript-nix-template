@@ -4,7 +4,7 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "test-starlight",
+  "name": "starlight-nix-template",
   "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2025-10-04",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
