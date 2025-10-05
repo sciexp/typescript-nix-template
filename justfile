@@ -4,6 +4,7 @@ default:
 
 # Contents
 ## CI/CD
+## Cloudflare
 ## Docs
 ## Nix
 
@@ -13,6 +14,23 @@ default:
 [group('CI/CD')]
 pre-commit:
   pre-commit run --all-files
+
+## Cloudflare
+
+# Preview the site locally with Cloudflare Workers
+[group('cloudflare')]
+cf-preview:
+  bun run preview
+
+# Deploy the site to Cloudflare Workers
+[group('cloudflare')]
+cf-deploy:
+  bun run deploy
+
+# Generate Cloudflare Worker types
+[group('cloudflare')]
+cf-types:
+  bun run cf-typegen
 
 ## Docs
 
