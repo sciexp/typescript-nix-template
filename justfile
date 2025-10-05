@@ -8,6 +8,7 @@ default:
 ## Docs
 ## Nix
 ## Secrets
+## Testing
 
 ## CI/CD
 
@@ -396,3 +397,40 @@ updatekeys:
     sops updatekeys "$file"; \
   done
   @echo "✅ Keys updated for all secrets files"
+
+## Testing
+
+# Run all tests (unit and E2E)
+[group('testing')]
+test:
+  bun run test
+
+# Run unit tests with vitest
+[group('testing')]
+test-unit:
+  bun run test:unit
+
+# Run E2E tests with playwright
+[group('testing')]
+test-e2e:
+  bun run test:e2e
+
+# Run vitest in watch mode
+[group('testing')]
+test-watch:
+  bun run test:watch
+
+# Run playwright in UI mode
+[group('testing')]
+test-ui:
+  bun run test:ui
+
+# Generate test coverage report
+[group('testing')]
+test-coverage:
+  bun run test:coverage
+
+# Install playwright browsers
+[group('testing')]
+playwright-install:
+  bunx playwright install --with-deps
