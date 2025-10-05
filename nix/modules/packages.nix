@@ -28,7 +28,7 @@
             pkg-config
           ];
 
-          npmDepsHash = lib.fakeSha256;
+          npmDepsHash = "sha256-s+92bFThXcAqIFqfiMgp2WRvtiI+svd4kZRUffKoJ+s=";
 
           installPhase = ''
             runHook preInstall
