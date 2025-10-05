@@ -13,12 +13,9 @@
     }:
     {
       # nix build
-      packages = rec {
-        # Inherit set-git-env from git-env module
-        inherit (config.packages) set-git-env;
-
+      packages = {
         # Default package - will add docs build later
-        default = set-git-env;
+        # For now, set-git-env is available from git-env module
       };
     };
 }
