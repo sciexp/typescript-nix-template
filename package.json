@@ -24,10 +24,6 @@
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
     "@types/node": "^24.6.2",
-    "vite": "npm:rolldown-vite@latest",
     "wrangler": "^4.42.0"
-  },
-  "overrides": {
-    "vite": "npm:rolldown-vite@latest"
   }
 }
