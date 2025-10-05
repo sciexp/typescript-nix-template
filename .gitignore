@@ -24,6 +24,7 @@ pnpm-debug.log*
 result
 result-*
 .direnv/
+.pre-commit-config.yaml
 
 # wrangler files
 .wrangler
