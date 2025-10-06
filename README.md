@@ -8,14 +8,14 @@ This is a monorepo workspace containing TypeScript packages managed with Bun wor
 
 ## Packages
 
-- **[@sciexp/starlight-docs](./packages/starlight-docs)**: Astro Starlight documentation site [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+- **[@sciexp/docs](./packages/docs)**: Astro Starlight documentation site [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
 ## Project structure
 
 ```
 typescript-nix-template/
 ├── packages/
-│   └── starlight-docs/          # Astro Starlight documentation site
+│   └── docs/                    # Astro Starlight documentation site
 │       ├── src/
 │       ├── public/
 │       ├── e2e/
@@ -61,19 +61,19 @@ just install
 just clean
 
 # Run command in specific package
-just pkg starlight-docs <command>
+just pkg docs <command>
 
-# Run command in starlight-docs (shorthand)
+# Run command in docs (shorthand)
 just docs <command>
 ```
 
 ### Package-specific commands
 
 ```bash
-# Start dev server for starlight-docs
+# Start dev server for docs
 just dev
 
-# Build starlight-docs
+# Build docs
 just build
 
 # Run tests
@@ -90,9 +90,9 @@ just test-e2e
 
 ```bash
 # Run command in specific package
-bun run --filter '@sciexp/starlight-docs' dev
-bun run --filter '@sciexp/starlight-docs' build
-bun run --filter '@sciexp/starlight-docs' test
+bun run --filter '@sciexp/docs' dev
+bun run --filter '@sciexp/docs' build
+bun run --filter '@sciexp/docs' test
 
 # Run command in all packages
 bun run --filter '@sciexp/*' test
@@ -106,8 +106,8 @@ Comprehensive testing with Vitest and Playwright:
 | :--------------------- | :---------------------------------------- |
 | `just test`            | Run all tests in all packages             |
 | `just test-pkg <name>` | Run tests in specific package             |
-| `just test-unit`       | Run unit tests in starlight-docs          |
-| `just test-e2e`        | Run E2E tests in starlight-docs           |
+| `just test-unit`       | Run unit tests in docs                    |
+| `just test-e2e`        | Run E2E tests in docs                     |
 | `just test-watch`      | Run Vitest in watch mode                  |
 | `just test-ui`         | Run Playwright in UI mode                 |
 | `just test-coverage`   | Generate test coverage report             |
@@ -116,7 +116,7 @@ Comprehensive testing with Vitest and Playwright:
 
 ### Cloudflare Workers
 
-The starlight-docs package deploys to Cloudflare Workers:
+The docs package deploys to Cloudflare Workers:
 
 ```bash
 # Preview locally
@@ -145,7 +145,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
 ```bash
 # Test release for specific package
-just test-release starlight-docs
+just test-release docs
 
 # Test release for all packages
 just test-release-all
