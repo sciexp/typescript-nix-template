@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Documentation Pages", () => {
   test("has sidebar navigation on example guide page", async ({ page }) => {
+    // Set desktop viewport to ensure sidebar is visible (hidden on mobile)
+    await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/guides/example/");
 
     // Verify sidebar navigation exists
@@ -10,6 +12,8 @@ test.describe("Documentation Pages", () => {
   });
 
   test("sidebar contains configured navigation items", async ({ page }) => {
+    // Set desktop viewport to ensure sidebar is visible (hidden on mobile)
+    await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/guides/example/");
 
     // Verify sidebar contains the Guides section
@@ -19,6 +23,8 @@ test.describe("Documentation Pages", () => {
   });
 
   test("has table of contents on desktop", async ({ page }) => {
+    // Set desktop viewport for right sidebar TOC
+    await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/guides/example/");
 
     // Verify right sidebar with table of contents exists
