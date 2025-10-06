@@ -122,7 +122,7 @@ jobs:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: |
           if [ "${{ inputs.environment }}" = "preview" ]; then
-            nix develop -c sops exec-env vars/shared.yaml 'just cf-deploy-preview ${{ inputs.branch }}'
+            nix develop -c just cf-deploy-preview ${{ inputs.branch }}
           else
-            nix develop -c sops exec-env vars/shared.yaml 'just cf-deploy-production ${{ inputs.branch }}'
+            nix develop -c just cf-deploy-production ${{ inputs.branch }}
           fi
