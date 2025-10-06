@@ -1,0 +1,5 @@
+# https://github.com/github-linguist/linguist/blob/master/docs/overrides.md
+scripts/*.sh linguist-vendored
+.envrc linguist-vendored
+justfile linguist-documentation
+
