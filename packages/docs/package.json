@@ -1,8 +1,8 @@
 {
-  "name": "@sciexp/starlight-docs",
+  "name": "@sciexp/docs",
   "version": "0.0.0-development",
   "private": true,
-  "description": "Starlight documentation site for sciexp projects",
+  "description": "Documentation site for sciexp projects",
   "type": "module",
   "repository": {
     "type": "git",
@@ -104,8 +104,8 @@
         "semantic-release-major-tag",
         {
           "customTags": [
-            "starlight-docs-v${major}",
-            "starlight-docs-v${major}.${minor}"
+            "docs-v${major}",
+            "docs-v${major}.${minor}"
           ]
         }
       ]
