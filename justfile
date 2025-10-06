@@ -231,10 +231,15 @@ gh-cancel run_id="":
 cf-preview:
   bun run preview
 
-# Deploy the site to Cloudflare Workers
+# Build and deploy the site to Cloudflare Workers
 [group('cloudflare')]
-cf-deploy: install
+cf-build-deploy: install
   bun run deploy
+
+# Deploy pre-built site to Cloudflare Workers (no rebuild)
+[group('cloudflare')]
+cf-deploy:
+  bunx wrangler deploy
 
 # Generate Cloudflare Worker types
 [group('cloudflare')]
