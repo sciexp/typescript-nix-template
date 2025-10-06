@@ -146,18 +146,13 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         with:
           installer: ${{ inputs.nix_installer || 'quick' }}
           system: x86_64-linux
-      - name: Setup and authenticate cachix
-        env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: |
-          nix develop -c sops exec-env vars/shared.yaml '
-            cachix authtoken "$CACHIX_AUTH_TOKEN"
-            cachix use "$CACHIX_CACHE_NAME"
-            cachix use nix-community
-          '
+          setup-cachix: true
+          cachix-auth: true
       - name: Setup tmate debug session
         uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # ratchet:mxschmitt/action-tmate@v3
         if: ${{ needs.set-variables.outputs.debug == 'true' }}
