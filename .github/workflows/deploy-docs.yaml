@@ -82,6 +82,7 @@ jobs:
           name: dist-${{ github.run_id }}
           path: dist/
           retention-days: 7
+          include-hidden-files: true
 
   deploy:
     needs: build

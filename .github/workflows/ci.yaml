@@ -265,6 +265,7 @@ jobs:
           name: dist
           path: dist/
           retention-days: 7
+          include-hidden-files: true
 
   deploy:
     needs: [set-variables, nix, test, build]
