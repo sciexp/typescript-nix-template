@@ -167,13 +167,13 @@ jobs:
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
           extraPullNames: nix-community
       - name: Install dependencies
-        run: nix develop --command bash -c "bun install"
+        run: nix develop -c just install
       - name: Run unit tests
-        run: nix develop --command bash -c "bun run test:unit"
+        run: nix develop -c just test-unit
       - name: Build for E2E tests
-        run: nix develop --command bash -c "bun run build"
+        run: nix develop -c just build
       - name: Run E2E tests
-        run: nix develop --command bash -c "bun run test:e2e"
+        run: nix develop -c just test-e2e
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5e6e6e5e2c0b89a5b0c5d5c9c3f5 # ratchet:actions/upload-artifact@v4
@@ -256,8 +256,7 @@ jobs:
             rm /tmp/decrypted-secrets.yaml
           fi
       - name: Build and deploy to Cloudflare Workers
-        run: |
-          nix develop --command bash -c "bun install && bun run deploy"
+        run: nix develop -c just cf-deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
