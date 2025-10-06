@@ -61,7 +61,7 @@ jobs:
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: |
-          sops exec-env vars/shared.yaml '
+          nix develop -c sops exec-env vars/shared.yaml '
             cachix use "$CACHIX_CACHE_NAME"
             cachix use nix-community
           '
@@ -111,7 +111,7 @@ jobs:
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: |
-          sops exec-env vars/shared.yaml '
+          nix develop -c sops exec-env vars/shared.yaml '
             cachix use "$CACHIX_CACHE_NAME"
             cachix use nix-community
           '
