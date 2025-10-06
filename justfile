@@ -236,54 +236,30 @@ cf-preview:
 cf-build-deploy: install
   bun run deploy
 
-# Deploy preview version to Cloudflare Pages (does not affect production)
+# Deploy to Cloudflare Workers (builds and deploys to production)
 [group('cloudflare')]
-cf-deploy-preview branch=`git branch --show-current`:
+cf-deploy:
   #!/usr/bin/env bash
   sops exec-env vars/shared.yaml "
-    echo 'Deploying preview for branch: {{branch}}'
-    bunx wrangler pages deploy dist/ \
-      --project-name=starlight-nix-template \
-      --branch={{branch}} \
-      --commit-dirty=true
+    echo 'Building and deploying to Cloudflare Workers...'
+    bun run build
+    bunx wrangler deploy
   "
 
-# Deploy to production on Cloudflare Pages
-[group('cloudflare')]
-cf-deploy-production branch=`git branch --show-current`:
-  #!/usr/bin/env bash
-  sops exec-env vars/shared.yaml "
-    echo 'Deploying production version for branch: {{branch}}'
-    bunx wrangler pages deploy dist/ \
-      --project-name=starlight-nix-template \
-      --branch={{branch}} \
-      --commit-dirty=true
-  "
-
-# List recent Cloudflare Pages deployments
+# List recent Cloudflare Workers deployments
 [group('cloudflare')]
 cf-deployments limit="10":
-  sops exec-env vars/shared.yaml "bunx wrangler pages deployment list --project-name=starlight-nix-template"
+  sops exec-env vars/shared.yaml "bunx wrangler deployments list --limit {{limit}}"
 
-# Get latest deployment ID from Cloudflare Pages
+# View deployment details
 [group('cloudflare')]
-cf-deployment-latest:
-  @sops exec-env vars/shared.yaml "bunx wrangler pages deployment list --project-name=starlight-nix-template --json | jq -r '.[0].id'"
+cf-deployment-view deployment_id:
+  sops exec-env vars/shared.yaml "bunx wrangler deployments view {{deployment_id}}"
 
-# Promote a specific deployment to production
+# Tail live logs from Cloudflare Workers
 [group('cloudflare')]
-cf-promote deployment_id:
-  sops exec-env vars/shared.yaml "bunx wrangler pages deployment promote {{deployment_id}} --project-name=starlight-nix-template"
-
-# Rollback to previous deployment (promote the second most recent)
-[group('cloudflare')]
-cf-rollback:
-  #!/usr/bin/env bash
-  sops exec-env vars/shared.yaml "
-    PREV_DEPLOYMENT=\$(bunx wrangler pages deployment list --project-name=starlight-nix-template --json | jq -r '.[1].id')
-    echo \"Rolling back to deployment: \$PREV_DEPLOYMENT\"
-    bunx wrangler pages deployment promote \$PREV_DEPLOYMENT --project-name=starlight-nix-template
-  "
+cf-tail:
+  sops exec-env vars/shared.yaml "bunx wrangler tail"
 
 # Generate Cloudflare Worker types
 [group('cloudflare')]
