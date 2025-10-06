@@ -1,8 +1,8 @@
-# @sciexp/starlight-docs
+# @sciexp/docs
 
 [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
-Starlight documentation site for sciexp projects, built with Astro and deployed to Cloudflare Workers.
+Documentation site for sciexp projects, built with Astro and deployed to Cloudflare Workers.
 
 ## Features
 
@@ -16,7 +16,7 @@ Starlight documentation site for sciexp projects, built with Astro and deployed 
 ## Project structure
 
 ```
-packages/starlight-docs/
+packages/docs/
 ├── src/
 │   ├── assets/              # Images and static assets
 │   ├── content/
@@ -42,18 +42,18 @@ packages/starlight-docs/
 # Start dev server
 just dev
 # or
-bun run --filter '@sciexp/starlight-docs' dev
+bun run --filter '@sciexp/docs' dev
 
 # Build
 just build
 # or
-bun run --filter '@sciexp/starlight-docs' build
+bun run --filter '@sciexp/docs' build
 ```
 
 ### From package directory
 
 ```bash
-cd packages/starlight-docs
+cd packages/docs
 
 # Start dev server
 bun run dev
