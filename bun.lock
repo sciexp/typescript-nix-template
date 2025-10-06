@@ -13,8 +13,8 @@
         "semantic-release-monorepo": "^8.0.2",
       },
     },
-    "packages/starlight-docs": {
-      "name": "@sciexp/starlight-docs",
+    "packages/docs": {
+      "name": "@sciexp/docs",
       "version": "0.0.0-development",
       "dependencies": {
         "@astrojs/cloudflare": "^12.6.9",
@@ -347,7 +347,7 @@
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.52.4", "", { "os": "win32", "cpu": "x64" }, "sha512-bf9PtUa0u8IXDVxzRToFQKsNCRz9qLYfR/MpECxl4mRoWYjAeFjgxj1XdZr2M/GNVpT05p+LgQOHopYDlUu6/w=="],
 
-    "@sciexp/starlight-docs": ["@sciexp/starlight-docs@workspace:packages/starlight-docs"],
+    "@sciexp/docs": ["@sciexp/docs@workspace:packages/docs"],
 
     "@sec-ant/readable-stream": ["@sec-ant/readable-stream@0.4.1", "", {}, "sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg=="],
 
