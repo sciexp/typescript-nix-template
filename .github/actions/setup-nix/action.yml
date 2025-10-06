@@ -18,7 +18,7 @@ runs:
   steps:
     - name: Reclaim disk space (Linux)
       if: runner.os == 'Linux'
-      uses: wimpysworld/nothing-but-nix@679d814406e750096d4165cf629a1f08e1753c2f # ratchet:wimpysworld/nothing-but-nix@main
+      uses: wimpysworld/nothing-but-nix@main
       with:
         hatchet-protocol: rampage
 
@@ -49,7 +49,7 @@ runs:
           /Users/runner/hostedtoolcache &
 
     - name: Install Nix
-      uses: DeterminateSystems/nix-installer-action@786fff0690178f1234e4e1fe9b536e94f5433196 # ratchet:DeterminateSystems/nix-installer-action@main
+      uses: DeterminateSystems/nix-installer-action@main
       with:
         extra-conf: |
           system = ${{ inputs.system }}
@@ -57,7 +57,7 @@ runs:
 
     - name: Report disk space (macOS post-cleanup)
       if: runner.os == 'macOS'
-      uses: srz-zumix/post-run-action@29841e63a8a45adc84c1edaf80cf9c233ceaf581 # ratchet:srz-zumix/post-run-action@v2
+      uses: srz-zumix/post-run-action@v2
       with:
         shell: bash -e {0}
         post-run: |
