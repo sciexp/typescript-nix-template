@@ -208,7 +208,7 @@ cf-preview:
 
 # Deploy the site to Cloudflare Workers
 [group('cloudflare')]
-cf-deploy:
+cf-deploy: install
   bun run deploy
 
 # Generate Cloudflare Worker types
