@@ -3,6 +3,10 @@ name: "CI/CD"
 on:
   workflow_dispatch:
     inputs:
+      job:
+        description: "Specific job to run (leave empty for all)"
+        type: string
+        required: false
       debug_enabled:
         description: "Run the workflow with tmate.io debugging enabled"
         required: true
@@ -40,6 +44,10 @@ jobs:
   scan:
     name: gitguardian
     runs-on: ubuntu-latest
+    if: |
+      github.event_name != 'workflow_dispatch' ||
+      inputs.job == '' ||
+      inputs.job == 'scan'
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
@@ -57,6 +65,11 @@ jobs:
   set-variables:
     needs: scan
     runs-on: ubuntu-latest
+    if: |
+      !cancelled() &&
+      (github.event_name != 'workflow_dispatch' ||
+       inputs.job == '' ||
+       inputs.job == 'set-variables')
     outputs:
       debug: ${{ steps.set-variables.outputs.debug }}
       skip_ci: ${{ steps.set-variables.outputs.skip_ci }}
@@ -114,7 +127,12 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     needs: set-variables
-    if: ${{ needs.set-variables.outputs.skip_ci != 'true' }}
+    if: |
+      !cancelled() &&
+      needs.set-variables.outputs.skip_ci != 'true' &&
+      (github.event_name != 'workflow_dispatch' ||
+       inputs.job == '' ||
+       inputs.job == 'nixci')
     concurrency:
       group: nixci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
       cancel-in-progress: true
@@ -148,7 +166,12 @@ jobs:
 
   test:
     needs: [set-variables]
-    if: ${{ needs.set-variables.outputs.skip_ci != 'true' }}
+    if: |
+      !cancelled() &&
+      needs.set-variables.outputs.skip_ci != 'true' &&
+      (github.event_name != 'workflow_dispatch' ||
+       inputs.job == '' ||
+       inputs.job == 'test')
     runs-on: ubuntu-latest
     concurrency:
       group: test-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
@@ -191,7 +214,12 @@ jobs:
 
   build:
     needs: [set-variables]
-    if: ${{ needs.set-variables.outputs.skip_ci != 'true' }}
+    if: |
+      !cancelled() &&
+      needs.set-variables.outputs.skip_ci != 'true' &&
+      (github.event_name != 'workflow_dispatch' ||
+       inputs.job == '' ||
+       inputs.job == 'build')
     runs-on: ubuntu-latest
     concurrency:
       group: build-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
@@ -220,7 +248,13 @@ jobs:
 
   deploy:
     needs: [set-variables, nixci, test, build]
-    if: ${{ needs.set-variables.outputs.skip_ci != 'true' && needs.set-variables.outputs.deploy_enabled == 'true' }}
+    if: |
+      !cancelled() &&
+      needs.set-variables.outputs.skip_ci != 'true' &&
+      needs.set-variables.outputs.deploy_enabled == 'true' &&
+      (github.event_name != 'workflow_dispatch' ||
+       inputs.job == '' ||
+       inputs.job == 'deploy')
     runs-on: ubuntu-latest
     environment:
       name: production
