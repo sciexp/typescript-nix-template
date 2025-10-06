@@ -38,3 +38,7 @@ vars/*
 !vars/*.yaml
 !vars/*.json
 !vars/README.md
+
+# playwright test outputs
+test-results/
+playwright-report/
