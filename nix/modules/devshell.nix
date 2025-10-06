@@ -31,6 +31,7 @@
             # CI/CD tools
             gh
             act
+            cachix
 
             # Testing tools
             playwright-driver.browsers
