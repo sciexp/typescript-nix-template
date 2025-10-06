@@ -184,17 +184,12 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         with:
           installer: ${{ inputs.nix_installer || 'quick' }}
           system: x86_64-linux
-      - name: Setup cachix for binary cache
-        env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: |
-          nix develop -c sops exec-env vars/shared.yaml '
-            cachix use "$CACHIX_CACHE_NAME"
-            cachix use nix-community
-          '
+          setup-cachix: true
       - name: Install dependencies
         run: nix develop -c just install
       - name: Run unit tests
