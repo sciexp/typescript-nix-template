@@ -460,31 +460,86 @@ gh workflow run ci.yaml -f job=nixci
 gh workflow run ci.yaml -f job=test -f debug_enabled=true
 ```
 
+## Implementation Status
+
+### Phase 1: Foundation (Completed)
+1. ✅ Create `.github/actions/setup-nix` composite action
+2. ✅ Add disk space optimization
+3. ✅ Update all workflows to use composite action
+4. ✅ Establish local/CI parity with `nix develop -c just [command]`
+
+**Commits:**
+- 1e451c9: test(e2e): add sidebar navigation tests
+- 0d3e1cf: feat(ci): add setup-nix composite action with disk optimization
+- 59dcc6d: refactor(just): make cf-deploy depend on install
+- 7a9b11c: refactor(ci): use setup-nix composite action in all jobs
+- bcb2328: refactor(ci): use just recipes for local/CI parity
+
+### Phase 2: Modular Workflows (Completed)
+1. ✅ Extract deploy-docs to reusable workflow
+2. ✅ Add workflow_dispatch with testing inputs
+3. ✅ Add job selection to ci.yaml
+4. ✅ Update main CI to use reusable workflow
+5. ✅ Add gh workflow management recipes to justfile
+
+**Commits:**
+- 3694b5c: docs: reorganize documentation structure
+- 930c613: feat(ci): add reusable deploy-docs workflow
+- 25681cc: feat(ci): add job selection to workflow dispatch
+- 803d7e2: refactor(ci): use reusable deploy-docs workflow
+- 101cb91: feat(just): add recipes for workflow testing
+
+**Key Improvements:**
+- Reusable deploy-docs workflow supporting both workflow_call and workflow_dispatch
+- Separation of build and deploy jobs for artifact reuse
+- Environment-based deployment (preview/production)
+- Selective job execution via workflow_dispatch input
+- Just recipes for testing: `gh-ci-job`, `gh-deploy`
+
+**Testing Commands:**
+```bash
+# Test specific CI job
+just gh-ci-job test
+just gh-ci-job build
+
+# Test deploy workflow
+just gh-deploy branch=main env=preview
+just gh-deploy branch=main env=production
+
+# Run full CI with deploy
+just gh-ci-run branch=main deploy=true
+
+# Watch workflow status
+just gh-workflow-status
+just gh-workflow-status deploy-docs.yaml
+```
+
+### Phase 3: Enhanced Testing (Pending)
+1. ⏳ Create test.yaml reusable workflow
+2. ⏳ Add matrix testing capabilities
+3. ⏳ Enhance gh workflow management recipes
+4. ⏳ Document testing procedures
+
 ## Implementation Priority
 
-### Phase 1: Foundation (High Impact, Low Risk)
+### Phase 1: Foundation (High Impact, Low Risk) - COMPLETED
 1. Create `.github/actions/setup-nix` composite action
 2. Add disk space optimization
 3. Update all workflows to use composite action
 4. Test disk space improvements
 
-### Phase 2: Local/CI Parity (High Impact, Medium Risk)
-1. Add core CI recipes to justfile (test, lint, build)
-2. Update ci.yaml to use `nix develop -c just [command]`
-3. Test locally to verify parity
-4. Document common workflows
-
-### Phase 3: Modular Workflows (Medium Impact, Medium Risk)
+### Phase 2: Modular Workflows (High Impact, Medium Risk) - COMPLETED
 1. Extract deploy-docs to reusable workflow
 2. Add workflow_dispatch with testing inputs
 3. Test via gh CLI
 4. Update main CI to use reusable workflow
+5. Add job selection to ci.yaml
+6. Add gh workflow management recipes to justfile
 
-### Phase 4: Enhanced Testing (Low Impact, Low Risk)
-1. Add job selection to ci.yaml
-2. Create test.yaml reusable workflow
-3. Add gh workflow management recipes to justfile
-4. Document testing procedures
+### Phase 3: Enhanced Testing (Low Impact, Low Risk) - PENDING
+1. Create test.yaml reusable workflow
+2. Add gh workflow management recipes to justfile
+3. Document testing procedures
 
 ## Trade-offs and Considerations
 
