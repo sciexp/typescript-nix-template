@@ -42,3 +42,6 @@ vars/*
 # playwright test outputs
 test-results/
 playwright-report/
+
+# test coverage
+coverage/
