@@ -60,7 +60,7 @@ describe("formatters", () => {
     });
 
     it("handles very short maxLength", () => {
-      expect(truncate("Hello", 5)).toBe("He...");
+      expect(truncate("Hello World", 5)).toBe("He...");
     });
 
     it("handles empty strings", () => {
