@@ -51,8 +51,8 @@ jobs:
         uses: actions/download-artifact@v4
         continue-on-error: true
         with:
-          name: dist-starlight-docs
-          path: packages/starlight-docs/dist/
+          name: dist-docs
+          path: packages/docs/dist/
 
       - name: Checkout
         if: steps.check-artifact.outcome == 'failure'
@@ -80,13 +80,13 @@ jobs:
 
       - name: Build documentation site
         if: steps.check-artifact.outcome == 'failure'
-        run: nix develop -c bun run --filter '@sciexp/starlight-docs' build
+        run: nix develop -c bun run --filter '@sciexp/docs' build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-starlight-docs-${{ github.run_id }}
-          path: packages/starlight-docs/dist/
+          name: dist-docs-${{ github.run_id }}
+          path: packages/docs/dist/
           retention-days: 7
           include-hidden-files: true
           overwrite: true
@@ -106,8 +106,8 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: dist-starlight-docs-${{ github.run_id }}
-          path: packages/starlight-docs/dist/
+          name: dist-docs-${{ github.run_id }}
+          path: packages/docs/dist/
 
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
@@ -123,7 +123,7 @@ jobs:
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: |
-          cd packages/starlight-docs
+          cd packages/docs
           if [ "${{ inputs.environment }}" = "preview" ]; then
             nix develop -c sops exec-env ../../vars/shared.yaml "bunx wrangler versions upload --preview-alias b-${{ inputs.branch }}"
           else
