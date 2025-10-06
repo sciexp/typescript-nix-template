@@ -1,12 +1,10 @@
-# Starlight Starter Kit: Basics
+# starlight-nix-template
 
 [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
 ```
 bun create astro@latest -- --template starlight
 ```
-
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
 
 ## 🚀 Project Structure
 
@@ -56,19 +54,6 @@ This project includes comprehensive testing with Vitest and Playwright.
 | `just test-watch`       | Run Vitest in watch mode                  |
 | `just test-ui`          | Run Playwright in UI mode                 |
 | `just test-coverage`    | Generate test coverage report             |
-
-### Nix-Based Playwright Setup
-
-This template uses Nix to provide Playwright browser binaries for reproducible testing.
-Browsers are automatically available in the `nix develop` shell via `playwright-driver.browsers`.
-
-**No browser installation needed** - when you run `just test-e2e`, Playwright uses the Nix-provided browsers from `/nix/store`.
-
-This approach ensures:
-- Deterministic browser versions across all developers
-- Faster CI builds (no browser downloads)
-- Works on NixOS without manual system dependency management
-- Browsers shared across projects via Nix store
 
 ## 👀 Want to learn more?
 
