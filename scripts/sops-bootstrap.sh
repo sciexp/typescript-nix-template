@@ -48,7 +48,7 @@ else
   trap "rm -f $KEY_FILE" EXIT
 
   age-keygen -o "$KEY_FILE" 2>&1 | tee /tmp/keygen-output.txt
-  PUBLIC_KEY=$(grep "public key:" /tmp/keygen-output.txt | cut -d: -f2 | xargs)
+  PUBLIC_KEY=$(grep -i "public key:" /tmp/keygen-output.txt | cut -d: -f2 | xargs)
   PRIVATE_KEY=$(cat "$KEY_FILE")
   rm -f /tmp/keygen-output.txt
 fi
