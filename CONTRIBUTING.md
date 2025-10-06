@@ -32,7 +32,7 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/) f
 ### Scopes
 
 Use package names as scopes:
-- `starlight-docs`: for changes to the starlight-docs package
+- `docs`: for changes to the docs package
 - `sqlrooms-hf-ducklake`: for changes to the sqlrooms-hf-ducklake package (when added)
 
 For cross-cutting changes affecting multiple packages, you can omit the scope or use multiple scopes separated by commas.
@@ -42,7 +42,7 @@ For cross-cutting changes affecting multiple packages, you can omit the scope or
 To trigger a major version bump, include `BREAKING CHANGE:` in the footer or use `!` after the type/scope:
 
 ```
-feat(starlight-docs)!: migrate to Astro 5
+feat(docs)!: migrate to Astro 5
 
 BREAKING CHANGE: Astro 5 requires Node 18+
 ```
@@ -51,21 +51,21 @@ BREAKING CHANGE: Astro 5 requires Node 18+
 
 ```bash
 # Feature in specific package
-feat(starlight-docs): add search functionality
+feat(docs): add search functionality
 
 # Bug fix with scope
-fix(starlight-docs): handle null values in query results
+fix(docs): handle null values in query results
 
 # Breaking change
-feat(starlight-docs)!: migrate to Astro 5
+feat(docs)!: migrate to Astro 5
 
 BREAKING CHANGE: Astro 5 requires Node 18+
 
 # Multiple scopes affected
-refactor(starlight-docs,sqlrooms-hf-ducklake): update typescript to 5.9
+refactor(docs,sqlrooms-hf-ducklake): update typescript to 5.9
 
 # Documentation
-docs(starlight-docs): update installation guide
+docs: update installation guide
 
 # Chore without scope
 chore: update dependencies
@@ -86,7 +86,7 @@ bun install
 just test
 
 # Run tests for specific package
-just test-pkg starlight-docs
+just test-pkg docs
 
 # Run unit tests
 just test-unit
@@ -102,7 +102,7 @@ just test-e2e
 just build
 
 # Or use bun directly
-bun run --filter '@sciexp/starlight-docs' build
+bun run --filter '@sciexp/docs' build
 ```
 
 ### Code quality
@@ -136,7 +136,7 @@ To test a release locally:
 bun run test-release
 
 # Test at package level
-cd packages/starlight-docs
+cd packages/docs
 bun run test-release
 ```
 
