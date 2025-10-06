@@ -132,7 +132,7 @@ jobs:
        inputs.job == '' ||
        inputs.job == 'nix')
     concurrency:
-      group: nixci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
+      group: nix-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
       cancel-in-progress: true
     steps:
       - name: Install dependencies
@@ -245,7 +245,7 @@ jobs:
           retention-days: 7
 
   deploy:
-    needs: [set-variables, nixci, test, build]
+    needs: [set-variables, nix, test, build]
     if: |
       !cancelled() &&
       needs.set-variables.outputs.skip_ci != 'true' &&
