@@ -21,14 +21,12 @@ on:
   pull_request:
     types: [opened, labeled, reopened, synchronize]
     paths-ignore:
-      - "**/*.md"
-      - "!ROLLDOWN.md"
-  push:
-    branches:
-      - "main"
-    paths-ignore:
-      - "**/*.md"
-      - "!ROLLDOWN.md"
+      - "*.md"
+  # push:
+  #   branches:
+  #     - "main"
+  #   paths-ignore:
+  #     - "*.md"
 
 defaults:
   run:
