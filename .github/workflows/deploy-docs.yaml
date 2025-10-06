@@ -1,0 +1,141 @@
+name: Deploy docs to Cloudflare
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: "Run with tmate.io debugging enabled"
+        required: false
+        type: string
+        default: "false"
+      branch:
+        description: "Git branch or ref to checkout"
+        required: true
+        type: string
+      environment:
+        description: "Deployment environment (preview or production)"
+        required: false
+        type: string
+        default: "preview"
+  workflow_call:
+    inputs:
+      debug_enabled:
+        description: "Run with tmate.io debugging enabled"
+        required: false
+        type: string
+        default: "false"
+      branch:
+        description: "Git branch or ref to checkout"
+        required: true
+        type: string
+      environment:
+        description: "Deployment environment (preview or production)"
+        required: false
+        type: string
+        default: "production"
+
+defaults:
+  run:
+    shell: bash
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
+        with:
+          system: x86_64-linux
+
+      - name: Setup remote cache
+        uses: cachix/cachix-action@be5295a636153b6ad194d3245f78f8e0b78dc704 # ratchet:cachix/cachix-action@master
+        continue-on-error: true
+        with:
+          name: "${{ vars.CACHIX_CACHE_NAME }}"
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          extraPullNames: nix-community
+
+      - name: Setup tmate debug session
+        uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # ratchet:mxschmitt/action-tmate@v3
+        if: ${{ inputs.debug_enabled == 'true' }}
+
+      - name: Install dependencies
+        run: nix develop -c just install
+
+      - name: Build documentation site
+        run: nix develop -c just build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@65c4c4a1ddee5e6e6e5e2c0b89a5b0c5d5c9c3f5 # ratchet:actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.run_id }}
+          path: dist/
+          retention-days: 7
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ inputs.environment }}
+      url: https://starlight-nix-template.pages.dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # ratchet:actions/download-artifact@v4
+        with:
+          name: dist-${{ github.run_id }}
+          path: dist/
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
+        with:
+          system: x86_64-linux
+
+      - name: Setup remote cache
+        uses: cachix/cachix-action@be5295a636153b6ad194d3245f78f8e0b78dc704 # ratchet:cachix/cachix-action@master
+        continue-on-error: true
+        with:
+          name: "${{ vars.CACHIX_CACHE_NAME }}"
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+          extraPullNames: nix-community
+
+      - name: Setup SOPS
+        run: |
+          nix profile install nixpkgs#sops
+          echo "${{ secrets.SOPS_AGE_KEY }}" > /tmp/sops-age-key.txt
+          chmod 600 /tmp/sops-age-key.txt
+          echo "SOPS_AGE_KEY_FILE=/tmp/sops-age-key.txt" >> $GITHUB_ENV
+
+      - name: Decrypt secrets
+        run: |
+          if [ -f vars/shared.yaml ]; then
+            sops --decrypt vars/shared.yaml > /tmp/decrypted-secrets.yaml
+            echo "CLOUDFLARE_API_TOKEN=$(grep CLOUDFLARE_API_TOKEN /tmp/decrypted-secrets.yaml | cut -d: -f2 | xargs)" >> $GITHUB_ENV
+            echo "CLOUDFLARE_ACCOUNT_ID=$(grep CLOUDFLARE_ACCOUNT_ID /tmp/decrypted-secrets.yaml | cut -d: -f2 | xargs)" >> $GITHUB_ENV
+            rm /tmp/decrypted-secrets.yaml
+          fi
+
+      - name: Deploy to Cloudflare Workers
+        run: nix develop -c just cf-deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f /tmp/sops-age-key.txt
+          rm -f /tmp/decrypted-secrets.yaml
