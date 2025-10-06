@@ -10,7 +10,7 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   integrations: [
     starlight({
-      title: "My Docs",
+      title: "Starlight nix",
       prerender: false,
       social: [
         {
@@ -40,7 +40,10 @@ export default defineConfig({
       enabled: true,
     },
 
-    imageService: "cloudflare",
+    // Use 'passthrough' to serve images directly without Cloudflare Image Resizing
+    // The 'cloudflare' option requires the Image Resizing subscription
+    // Reference: https://docs.astro.build/en/guides/integrations-guide/cloudflare/#imageservice
+    imageService: "passthrough",
   }),
 
   /* ROLLDOWN INTEGRATION (DISABLED - Cloudflare Workers Incompatibility)
