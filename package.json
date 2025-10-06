@@ -1,39 +1,96 @@
 {
-  "name": "starlight-nix-template",
-  "type": "module",
-  "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro build && wrangler dev",
-    "astro": "astro",
-    "deploy": "astro build && wrangler deploy",
-    "cf-typegen": "wrangler types",
-    "format": "biome format --write",
-    "lint": "biome lint",
-    "check": "biome check",
-    "check:fix": "biome check --write",
-    "test": "bun run test:unit && bun run test:e2e",
-    "test:unit": "vitest run",
-    "test:e2e": "playwright test",
-    "test:watch": "vitest watch",
-    "test:ui": "playwright test --ui",
-    "test:coverage": "vitest run --coverage"
+  "name": "typescript-nix-template",
+  "version": "0.0.0-development",
+  "private": true,
+  "description": "TypeScript project template with Nix, Bun workspaces, and semantic-release",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sciexp/typescript-nix-template.git"
   },
-  "dependencies": {
-    "@astrojs/cloudflare": "^12.6.9",
-    "@astrojs/starlight": "^0.36.0",
-    "astro": "^5.6.1",
-    "sharp": "^0.34.2"
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "packageManager": "bun@1.1.38",
+  "scripts": {
+    "test-release": "semantic-release --dry-run --no-ci"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.4",
-    "@playwright/test": "~1.54.0",
-    "@types/node": "^24.6.2",
-    "@vitest/coverage-v8": "^3.2.4",
-    "svgo": "^4.0.0",
-    "vitest": "^3.2.4",
-    "wrangler": "^4.42.0"
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^11.0.1",
+    "conventional-changelog-conventionalcommits": "^8.0.0",
+    "semantic-release": "^24.2.3",
+    "semantic-release-major-tag": "^0.3.2",
+    "semantic-release-monorepo": "^8.0.2"
+  },
+  "release": {
+    "extends": "semantic-release-monorepo",
+    "branches": [
+      {
+        "name": "main"
+      }
+    ],
+    "plugins": [
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "conventionalcommits",
+          "parserOpts": {
+            "noteKeywords": [
+              "BREAKING CHANGE",
+              "BREAKING-CHANGE"
+            ]
+          }
+        }
+      ],
+      [
+        "@semantic-release/release-notes-generator",
+        {
+          "preset": "conventionalcommits",
+          "parserOpts": {
+            "noteKeywords": [
+              "BREAKING CHANGE",
+              "BREAKING-CHANGE",
+              "NOTABLE CHANGE",
+              "NOTABLE-CHANGE"
+            ]
+          }
+        }
+      ],
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogTitle": "# Changelog"
+        }
+      ],
+      [
+        "@semantic-release/github",
+        {
+          "failComment": false,
+          "successComment": false,
+          "addReleases": "bottom"
+        }
+      ],
+      [
+        "semantic-release-major-tag",
+        {
+          "customTags": [
+            "v${major}",
+            "v${major}.${minor}"
+          ]
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}",
+          "assets": [
+            "CHANGELOG.md"
+          ]
+        }
+      ]
+    ],
+    "npmPublish": false
   }
 }
