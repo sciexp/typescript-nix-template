@@ -154,13 +154,15 @@ jobs:
         with:
           installer: ${{ inputs.nix_installer || 'full' }}
           system: x86_64-linux
-      - name: Setup remote cache
-        uses: cachix/cachix-action@be5295a636153b6ad194d3245f78f8e0b78dc704 # ratchet:cachix/cachix-action@master
-        continue-on-error: true
-        with:
-          name: "${{ vars.CACHIX_CACHE_NAME }}"
-          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-          extraPullNames: nix-community
+      - name: Setup and authenticate cachix
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: |
+          sops exec-env vars/shared.yaml '
+            cachix authtoken "$CACHIX_AUTH_TOKEN"
+            cachix use "$CACHIX_CACHE_NAME"
+            cachix use nix-community
+          '
       - name: Setup tmate debug session
         uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # ratchet:mxschmitt/action-tmate@v3
         if: ${{ needs.set-variables.outputs.debug == 'true' }}
@@ -168,8 +170,13 @@ jobs:
         run: nix --accept-flake-config profile install "github:juspay/omnix"
       - name: Summarize flake
         run: om show .
-      - name: Run flake CI
-        run: om ci run
+      - name: Run flake CI and push to cachix
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: |
+          sops exec-env vars/shared.yaml '
+            om ci run | tee /dev/stderr | cachix push "$CACHIX_CACHE_NAME"
+          '
 
   test:
     needs: [set-variables]
@@ -190,13 +197,14 @@ jobs:
         with:
           installer: ${{ inputs.nix_installer || 'quick' }}
           system: x86_64-linux
-      - name: Setup remote cache
-        uses: cachix/cachix-action@be5295a636153b6ad194d3245f78f8e0b78dc704 # ratchet:cachix/cachix-action@master
-        continue-on-error: true
-        with:
-          name: "${{ vars.CACHIX_CACHE_NAME }}"
-          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-          extraPullNames: nix-community
+      - name: Setup cachix for binary cache
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: |
+          sops exec-env vars/shared.yaml '
+            cachix use "$CACHIX_CACHE_NAME"
+            cachix use nix-community
+          '
       - name: Install dependencies
         run: nix develop -c just install
       - name: Run unit tests
@@ -239,13 +247,14 @@ jobs:
         with:
           installer: ${{ inputs.nix_installer || 'quick' }}
           system: x86_64-linux
-      - name: Setup remote cache
-        uses: cachix/cachix-action@be5295a636153b6ad194d3245f78f8e0b78dc704 # ratchet:cachix/cachix-action@master
-        continue-on-error: true
-        with:
-          name: "${{ vars.CACHIX_CACHE_NAME }}"
-          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-          extraPullNames: nix-community
+      - name: Setup cachix for binary cache
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: |
+          sops exec-env vars/shared.yaml '
+            cachix use "$CACHIX_CACHE_NAME"
+            cachix use nix-community
+          '
       - name: Install dependencies
         run: nix develop -c just install
       - name: Build documentation site
