@@ -1,5 +1,5 @@
 {
-  description = "starlight-nix-template documentation site with Astro Starlight and Bun";
+  description = "typescript-nix-template: TypeScript monorepo with Astro, Bun, and Nix";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
