@@ -37,7 +37,9 @@ export default defineConfig({
 
   adapter: cloudflare({
     platformProxy: {
-      enabled: true,
+      // Disable during tests to prevent hanging Vite server
+      // The platformProxy creates background processes that don't clean up properly
+      enabled: process.env.VITEST !== "true",
     },
 
     // Use 'passthrough' to serve images directly without Cloudflare Image Resizing

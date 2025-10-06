@@ -1,6 +1,9 @@
 /// <reference types="vitest/config" />
 import { getViteConfig } from "astro/config";
 
+// Set environment variable to disable Cloudflare platformProxy during tests
+process.env.VITEST = "true";
+
 export default getViteConfig({
   test: {
     // Test environment
