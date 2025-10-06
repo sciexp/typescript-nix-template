@@ -286,7 +286,7 @@ cf-deployments:
 # Generate Cloudflare Worker types
 [group('cloudflare')]
 cf-types:
-  bun run cf-typegen
+  bun run cf-typegen --include-runtime=false
 
 ## Docs
 
