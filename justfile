@@ -236,10 +236,48 @@ cf-preview:
 cf-build-deploy: install
   bun run deploy
 
-# Deploy pre-built site to Cloudflare Workers (no rebuild)
+# Deploy preview version to Cloudflare (does not affect production)
 [group('cloudflare')]
-cf-deploy:
-  bunx wrangler deploy
+cf-deploy-preview branch=`git branch --show-current`:
+  #!/usr/bin/env bash
+  echo "Deploying preview for branch: {{branch}}"
+  OUTPUT=$(bunx wrangler versions upload --preview-alias b-{{branch}})
+  echo "$OUTPUT"
+  VERSION_ID=$(echo "$OUTPUT" | grep -oP 'Version ID: \K[a-f0-9-]+')
+  if [ -n "$VERSION_ID" ]; then
+    echo ""
+    echo "Preview deployed successfully!"
+    echo "To rollout to production, run:"
+    echo "  just cf-rollout $VERSION_ID"
+    echo ""
+    echo "For gradual rollout, use traffic percentage:"
+    echo "  just cf-rollout $VERSION_ID 10   # 10% traffic"
+    echo "  just cf-rollout $VERSION_ID 50   # 50% traffic"
+    echo "  just cf-rollout $VERSION_ID 100  # 100% traffic"
+  fi
+
+# Rollout version to production with optional traffic percentage (default 100%)
+[group('cloudflare')]
+cf-rollout version_id percentage="100":
+  bunx wrangler versions deploy {{version_id}}@{{percentage}} --yes
+
+# List recent Cloudflare Workers versions
+[group('cloudflare')]
+cf-versions limit="10":
+  bunx wrangler versions list --limit {{limit}}
+
+# Get latest version ID from Cloudflare
+[group('cloudflare')]
+cf-version-latest:
+  @bunx wrangler versions list --limit 1 --json | jq -r '.[0].id'
+
+# Rollback to previous version (100% traffic)
+[group('cloudflare')]
+cf-rollback:
+  #!/usr/bin/env bash
+  PREV_VERSION=$(bunx wrangler versions list --limit 2 --json | jq -r '.[1].id')
+  echo "Rolling back to version: $PREV_VERSION"
+  bunx wrangler versions deploy ${PREV_VERSION}@100 --yes
 
 # Generate Cloudflare Worker types
 [group('cloudflare')]
