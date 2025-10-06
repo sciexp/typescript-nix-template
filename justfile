@@ -236,30 +236,54 @@ cf-preview:
 cf-build-deploy: install
   bun run deploy
 
-# Deploy to Cloudflare Workers (builds and deploys to production)
+# Deploy preview version with aliased preview URL for branch
 [group('cloudflare')]
-cf-deploy:
+cf-deploy-preview branch=`git branch --show-current`:
   #!/usr/bin/env bash
   sops exec-env vars/shared.yaml "
-    echo 'Building and deploying to Cloudflare Workers...'
+    echo 'Deploying preview for branch: {{branch}}'
+    echo 'Building...'
+    bun run build
+    echo 'Uploading version with preview alias...'
+    bunx wrangler versions upload --preview-alias {{branch}}
+    echo ''
+    echo 'Preview URL: https://{{branch}}-starlight-nix-template.<subdomain>.workers.dev'
+  "
+
+# Deploy to production (immediate 100% rollout)
+[group('cloudflare')]
+cf-deploy-production:
+  #!/usr/bin/env bash
+  sops exec-env vars/shared.yaml "
+    echo 'Building and deploying to production...'
     bun run build
     bunx wrangler deploy
   "
 
-# List recent Cloudflare Workers deployments
+# List recent versions
 [group('cloudflare')]
-cf-deployments limit="10":
-  sops exec-env vars/shared.yaml "bunx wrangler deployments list --limit {{limit}}"
+cf-versions limit="10":
+  sops exec-env vars/shared.yaml "bunx wrangler versions list --limit {{limit}}"
 
-# View deployment details
+# View specific version details
 [group('cloudflare')]
-cf-deployment-view deployment_id:
-  sops exec-env vars/shared.yaml "bunx wrangler deployments view {{deployment_id}}"
+cf-version-view version_id:
+  sops exec-env vars/shared.yaml "bunx wrangler versions view {{version_id}}"
+
+# Deploy specific version(s) with traffic split (gradual deployment)
+[group('cloudflare')]
+cf-versions-deploy:
+  sops exec-env vars/shared.yaml "bunx wrangler versions deploy"
 
 # Tail live logs from Cloudflare Workers
 [group('cloudflare')]
 cf-tail:
   sops exec-env vars/shared.yaml "bunx wrangler tail"
+
+# List deployments
+[group('cloudflare')]
+cf-deployments:
+  sops exec-env vars/shared.yaml "bunx wrangler deployments list"
 
 # Generate Cloudflare Worker types
 [group('cloudflare')]

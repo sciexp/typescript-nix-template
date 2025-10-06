@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment }}
-      url: https://starlight-nix-template.pages.dev
+      url: https://starlight.scientistexperience.net
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
@@ -120,9 +120,9 @@ jobs:
 
       - name: Deploy to Cloudflare Workers
         id: deployment
-        env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: |
-          nix develop -c sops exec-env vars/shared.yaml '
-            bunx wrangler deploy
-          '
+          if [ "${{ inputs.environment }}" = "preview" ]; then
+            nix develop -c just cf-deploy-preview ${{ inputs.branch }}
+          else
+            nix develop -c just cf-deploy-production
+          fi

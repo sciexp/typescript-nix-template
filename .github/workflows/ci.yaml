@@ -80,6 +80,7 @@ jobs:
       debug: ${{ steps.set-variables.outputs.debug }}
       skip_ci: ${{ steps.set-variables.outputs.skip_ci }}
       deploy_enabled: ${{ steps.set-variables.outputs.deploy_enabled }}
+      deploy_environment: ${{ steps.set-variables.outputs.deploy_environment }}
       checkout_ref: ${{ steps.set-variables.outputs.checkout_ref }}
       checkout_rev: ${{ steps.set-variables.outputs.checkout_rev }}
 
@@ -90,6 +91,7 @@ jobs:
           DEBUG="false"
           SKIP_CI="false"
           DEPLOY_ENABLED="false"
+          DEPLOY_ENVIRONMENT="preview"
 
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             DEBUG="${{ inputs.debug_enabled }}"
@@ -110,20 +112,23 @@ jobs:
             CHECKOUT_REV="${{ github.sha }}"
           fi
 
-          # Enable deployment on push to main
+          # Enable deployment on push to main (production)
           if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/main" ]]; then
             DEPLOY_ENABLED="true"
+            DEPLOY_ENVIRONMENT="production"
           fi
 
           echo "DEBUG=$DEBUG"
           echo "SKIP_CI=$SKIP_CI"
           echo "DEPLOY_ENABLED=$DEPLOY_ENABLED"
+          echo "DEPLOY_ENVIRONMENT=$DEPLOY_ENVIRONMENT"
           echo "CHECKOUT_REF=$CHECKOUT_REF"
           echo "CHECKOUT_REV=$CHECKOUT_REV"
 
           echo "DEBUG=$DEBUG" >> $GITHUB_OUTPUT
           echo "SKIP_CI=$SKIP_CI" >> $GITHUB_OUTPUT
           echo "DEPLOY_ENABLED=$DEPLOY_ENABLED" >> $GITHUB_OUTPUT
+          echo "DEPLOY_ENVIRONMENT=$DEPLOY_ENVIRONMENT" >> $GITHUB_OUTPUT
           echo "CHECKOUT_REF=$CHECKOUT_REF" >> $GITHUB_OUTPUT
           echo "CHECKOUT_REV=$CHECKOUT_REV" >> $GITHUB_OUTPUT
 
@@ -233,5 +238,5 @@ jobs:
     with:
       debug_enabled: ${{ needs.set-variables.outputs.debug }}
       branch: ${{ needs.set-variables.outputs.checkout_ref }}
-      environment: production
+      environment: ${{ needs.set-variables.outputs.deploy_environment }}
     secrets: inherit
