@@ -397,7 +397,7 @@ rotate-secret secret_name:
 updatekeys:
   @for file in $(find vars -name "*.yaml" -o -name "*.json"); do \
     echo "Updating keys for: $file"; \
-    sops updatekeys "$file"; \
+    sops updatekeys -y "$file"; \
   done
   @echo "✅ Keys updated for all secrets files"
 
