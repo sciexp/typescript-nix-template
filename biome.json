@@ -3,12 +3,12 @@
   "files": {
     "ignoreUnknown": false,
     "includes": [
-      "src/**",
-      "e2e/**",
-      "tests/**",
-      "astro.config.mjs",
-      "vitest.config.ts",
-      "playwright.config.ts",
+      "packages/*/src/**",
+      "packages/*/e2e/**",
+      "packages/*/tests/**",
+      "packages/*/*.config.mjs",
+      "packages/*/*.config.ts",
+      "packages/*/package.json",
       "package.json"
     ]
   },
