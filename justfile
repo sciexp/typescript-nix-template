@@ -464,7 +464,11 @@ test-ui:
 test-coverage:
   bun run test:coverage
 
-# Install playwright browsers
+# Install playwright browsers (only needed outside Nix environment)
+# The Nix devshell provides browsers via playwright-driver.browsers
+# See: nix/modules/devshell.nix lines 36, 47-48
 [group('testing')]
 playwright-install:
+  @echo "Note: When using 'nix develop', browsers are provided by Nix"
+  @echo "This command is only needed in non-Nix environments"
   bunx playwright install --with-deps
