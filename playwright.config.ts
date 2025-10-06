@@ -23,11 +23,11 @@ export default defineConfig({
   // Reporter configuration
   reporter: process.env.CI
     ? [
-        ["html", { outputFolder: "playwright-report" }],
+        ["html", { outputFolder: "playwright-report", open: "never" }],
         ["json", { outputFile: "playwright-report/results.json" }],
         ["github"],
       ]
-    : [["html", { outputFolder: "playwright-report" }]],
+    : [["list"], ["html", { outputFolder: "playwright-report", open: "never" }]],
 
   // Shared settings for all projects
   use: {
