@@ -103,10 +103,23 @@ EOF
 
   # For bootstrap, we can encrypt immediately
   if [ "$ROLE" = "dev" ]; then
+    # Create temporary .sops.yaml with only dev key to avoid encrypting for placeholder CI key
+    cat > /tmp/sops-bootstrap.yaml << SOPSEOF
+keys:
+  - &dev ${PUBLIC_KEY}
+
+creation_rules:
+  - path_regex: vars/.*\.yaml$
+    key_groups:
+      - age:
+          - *dev
+SOPSEOF
+
     echo "$PRIVATE_KEY" > /tmp/bootstrap-key.txt
-    SOPS_AGE_KEY_FILE=/tmp/bootstrap-key.txt sops -e /tmp/shared-template.yaml > vars/shared.yaml
-    rm /tmp/bootstrap-key.txt
+    SOPS_AGE_KEY_FILE=/tmp/bootstrap-key.txt sops --config /tmp/sops-bootstrap.yaml -e /tmp/shared-template.yaml > vars/shared.yaml
+    rm /tmp/bootstrap-key.txt /tmp/sops-bootstrap.yaml
     echo "✅ Created vars/shared.yaml (edit with: just edit-secrets)"
+    echo "   Note: After generating CI key, run 'just updatekeys' to add it"
   else
     echo "⚠️  Cannot encrypt without dev key. Create dev key first."
     echo "   Unencrypted template at: /tmp/shared-template.yaml"
