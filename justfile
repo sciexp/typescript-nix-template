@@ -284,6 +284,8 @@ cf-deployments:
   sops exec-env vars/shared.yaml "bunx wrangler deployments list"
 
 # Generate Cloudflare Worker types
+# Note: --include-runtime=false works around wrangler 4.42.0 EPIPE bug
+# Runtime types are only for IDE autocomplete; production builds don't need them
 [group('cloudflare')]
 cf-types:
   bun run cf-typegen --include-runtime=false
