@@ -120,6 +120,8 @@ jobs:
 
       - name: Deploy to Cloudflare Workers
         id: deployment
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: |
           if [ "${{ inputs.environment }}" = "preview" ]; then
             nix develop -c just cf-deploy-preview ${{ inputs.branch }}
