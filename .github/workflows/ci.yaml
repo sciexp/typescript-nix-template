@@ -168,8 +168,6 @@ jobs:
         run: nix develop --command bash -c "bun install"
       - name: Run unit tests
         run: nix develop --command bash -c "bun run test:unit"
-      - name: Install Playwright browsers
-        run: nix develop --command bash -c "bunx playwright install --with-deps"
       - name: Build for E2E tests
         run: nix develop --command bash -c "bun run build"
       - name: Run E2E tests
