@@ -117,6 +117,31 @@ gh-ci-run branch=`git branch --show-current` debug="false" deploy="false":
     --field deploy_enabled="{{deploy}}"
   echo "Check workflow status with: just gh-workflow-status"
 
+# Test specific CI job remotely on GitHub
+[group('CI/CD')]
+gh-ci-job job branch=`git branch --show-current` debug="false":
+  #!/usr/bin/env bash
+  echo "Triggering CI job '{{job}}' on GitHub (branch: {{branch}}, debug: {{debug}})..."
+  gh workflow run ci.yaml \
+    --repo ${GITHUB_REPOSITORY:-$(gh repo view --json nameWithOwner -q .nameWithOwner)} \
+    --ref "{{branch}}" \
+    --field job="{{job}}" \
+    --field debug_enabled="{{debug}}"
+  echo "Check workflow status with: just gh-workflow-status"
+
+# Test deploy workflow remotely on GitHub
+[group('CI/CD')]
+gh-deploy branch=`git branch --show-current` env="preview" debug="false":
+  #!/usr/bin/env bash
+  echo "Triggering deploy-docs workflow on GitHub (branch: {{branch}}, env: {{env}}, debug: {{debug}})..."
+  gh workflow run deploy-docs.yaml \
+    --repo ${GITHUB_REPOSITORY:-$(gh repo view --json nameWithOwner -q .nameWithOwner)} \
+    --ref "{{branch}}" \
+    --field branch="{{branch}}" \
+    --field environment="{{env}}" \
+    --field debug_enabled="{{debug}}"
+  echo "Check workflow status with: just gh-workflow-status deploy-docs.yaml"
+
 # View recent workflow runs status
 [group('CI/CD')]
 gh-workflow-status workflow="ci.yaml" branch=`git branch --show-current` limit="5":
