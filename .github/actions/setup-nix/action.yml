@@ -1,0 +1,66 @@
+name: setup-nix
+description: Setup Nix with disk space optimization
+
+inputs:
+  system:
+    description: Nix system to configure (e.g., x86_64-linux, aarch64-darwin)
+    type: string
+    required: false
+    default: x86_64-linux
+  extra-conf:
+    description: Additional nix.conf configuration
+    type: string
+    required: false
+    default: system-features = nixos-test benchmark big-parallel kvm
+
+runs:
+  using: composite
+  steps:
+    - name: Reclaim disk space (Linux)
+      if: runner.os == 'Linux'
+      uses: wimpysworld/nothing-but-nix@679d814406e750096d4165cf629a1f08e1753c2f # ratchet:wimpysworld/nothing-but-nix@main
+      with:
+        hatchet-protocol: rampage
+
+    - name: Reclaim disk space (macOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        echo "::group::Disk space before cleanup"
+        sudo df -h
+        echo "::endgroup::"
+
+        echo "::group::Disable Spotlight indexing"
+        sudo mdutil -i off -a || echo "mdutil failed"
+        sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist \
+          || echo "launchctl unload failed"
+        echo "::endgroup::"
+
+        echo "Starting background cleanup to reclaim disk space..."
+        sudo rm -rf \
+          /Applications/Xcode_* \
+          /Library/Developer/CoreSimulator \
+          /Library/Frameworks \
+          /Users/runner/.dotnet \
+          /Users/runner/.rustup \
+          /Users/runner/Library/Android \
+          /Users/runner/Library/Caches \
+          /Users/runner/Library/Developer/CoreSimulator \
+          /Users/runner/hostedtoolcache &
+
+    - name: Install Nix
+      uses: DeterminateSystems/nix-installer-action@786fff0690178f1234e4e1fe9b536e94f5433196 # ratchet:DeterminateSystems/nix-installer-action@main
+      with:
+        extra-conf: |
+          system = ${{ inputs.system }}
+          ${{ inputs.extra-conf }}
+
+    - name: Report disk space (macOS post-cleanup)
+      if: runner.os == 'macOS'
+      uses: srz-zumix/post-run-action@29841e63a8a45adc84c1edaf80cf9c233ceaf581 # ratchet:srz-zumix/post-run-action@v2
+      with:
+        shell: bash -e {0}
+        post-run: |
+          echo "::group::Disk space after workflow"
+          sudo df -h
+          echo "::endgroup::"
