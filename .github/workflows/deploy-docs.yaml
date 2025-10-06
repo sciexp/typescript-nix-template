@@ -76,11 +76,11 @@ jobs:
 
       - name: Install dependencies
         if: steps.check-artifact.outcome == 'failure'
-        run: nix develop -c bun install
+        run: nix develop -c just install
 
       - name: Build documentation site
         if: steps.check-artifact.outcome == 'failure'
-        run: nix develop -c bun run --filter '@sciexp/docs' build
+        run: nix develop -c just build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
