@@ -43,6 +43,7 @@ if [ "$METHOD" = "ssh" ]; then
 else
   echo "🔑 Generating age key pair..."
   KEY_FILE=$(mktemp)
+  rm -f "$KEY_FILE"  # age-keygen expects to create the file itself
   trap "rm -f $KEY_FILE" EXIT
 
   age-keygen -o "$KEY_FILE" 2>&1 | tee /tmp/keygen-output.txt
