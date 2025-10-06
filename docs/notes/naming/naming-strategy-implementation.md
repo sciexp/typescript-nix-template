@@ -42,10 +42,10 @@ mv packages/starlight-docs packages/docs
 
 ```json
 {
-  "name": "sciexp-docs",
+  "name": "ts-nix-docs",
   "routes": [
     {
-      "pattern": "docs.scientistexperience.net",
+      "pattern": "ts-nix.scientistexperience.net",
       "custom_domain": true
     }
   ]
@@ -171,25 +171,42 @@ om init --template github:sciexp/typescript-nix-template myproject
 
 ## Deployment pattern
 
-### For sciexp
+### Sciexp subdomain strategy
+
+**Top-level reserved:**
+- `docs.scientistexperience.net` - org-wide documentation
+- `api.scientistexperience.net` - org-wide API gateway
+- `www.scientistexperience.net` - main org site
+
+**Project subdomains:**
+- `{project}.scientistexperience.net` - project main site
+- `{component}.{project}.scientistexperience.net` - project components
+
+### For typescript-nix-template
 
 - Package: `@sciexp/docs`
-- Worker: `sciexp-docs`
-- Route: `docs.scientistexperience.net`
+- Worker: `ts-nix-docs`
+- Route: `ts-nix.scientistexperience.net`
 
-Future packages:
-- `@sciexp/sqlrooms` → `sciexp-sqlrooms` → `sqlrooms.scientistexperience.net`
+**Rationale:**
+- Preserves `docs.*` for actual org documentation
+- `ts-nix` identifies the template project
+- Worker name indicates package for clarity
+
+**Alternative**: `docs.ts-nix.scientistexperience.net` (more explicit about component)
 
 ### For template users
 
-Recommended pattern:
-- Package: `@{scope}/{name}`
-- Worker: `{scope}-{name}`
-- Route: `{name}.{domain}` or `{subdomain}.{domain}`
+**Single-package projects:**
+```
+@myorg/docs → myproject → myproject.example.com
+```
 
-Example:
-- `@acme/docs` → `acme-docs` → `docs.acme.com`
-- `@acme/app` → `acme-app` → `app.acme.com`
+**Multi-package projects:**
+```
+@myorg/docs → myproject-docs → docs.myproject.example.com
+@myorg/api  → myproject-api  → api.myproject.example.com
+```
 
 ## Success criteria
 

@@ -28,8 +28,8 @@ Following python-nix-template's approach, use names that work for both purposes.
 |-----------|---------|-----|-----------|
 | Package name | `@sciexp/starlight-docs` | `@sciexp/docs` | Generic, framework-agnostic, legitimate for both uses |
 | Directory | `packages/starlight-docs/` | `packages/docs/` | Matches package name |
-| Wrangler name | `starlight-nix-template` | `sciexp-docs` | Professional deployment name |
-| Route | `starlight.scientistexperience.net` | `docs.scientistexperience.net` | Clean subdomain pattern |
+| Wrangler name | `starlight-nix-template` | `ts-nix-docs` | Indicates project and package |
+| Route | `starlight.scientistexperience.net` | `ts-nix.scientistexperience.net` | Project subdomain, preserves `docs.*` namespace |
 | Commit scope | `starlight-docs` | `docs` | Shorter, framework-independent |
 | Tags | `starlight-docs-v1.0.0` | `docs-v1.0.0` | Matches package name |
 
@@ -44,29 +44,71 @@ Following python-nix-template's approach, use names that work for both purposes.
 
 ## Deployment pattern
 
-### Recommended pattern for monorepo packages
+### Sciexp organization subdomain strategy
 
+**Top-level reserved (precious namespace):**
 ```
-Package: @{scope}/{name}
-Worker:  {scope}-{name}
-Route:   {name}.{domain}
+docs.scientistexperience.net      # org-wide documentation
+api.scientistexperience.net       # org-wide API gateway
+www.scientistexperience.net       # main org site
 ```
 
-### Examples
+**Project subdomains (scalable):**
+```
+{project}.scientistexperience.net              # project main site
+{component}.{project}.scientistexperience.net  # project components (if needed)
+```
 
-**For sciexp:**
-- `@sciexp/docs` → worker: `sciexp-docs` → `docs.scientistexperience.net`
-- `@sciexp/sqlrooms` → worker: `sciexp-sqlrooms` → `sqlrooms.scientistexperience.net`
+### For typescript-nix-template
 
-**For template users:**
-- `@acme/docs` → worker: `acme-docs` → `docs.acme.com`
-- `@acme/app` → worker: `acme-app` → `app.acme.com`
+| Component | Value |
+|-----------|-------|
+| Package | `@sciexp/docs` |
+| Worker | `ts-nix-docs` |
+| Route | `ts-nix.scientistexperience.net` |
 
-This pattern is:
-- Consistent across all deployments
-- Easy to understand and replicate
-- Professional for production use
-- Scalable to many packages
+**Rationale:**
+- Preserves `docs.*` for actual org documentation
+- `ts-nix` is short identifier for typescript-nix-template project
+- The docs package IS the main/only site for this template
+- Worker name includes package for clarity if more packages added
+
+**Alternative option** (more explicit):
+- Route: `docs.ts-nix.scientistexperience.net`
+- Demonstrates nested subdomain pattern from the start
+- Choose based on preference for simplicity vs explicitness
+
+### Examples for real projects
+
+**Single-site projects:**
+- `@sciexp/sqlrooms` → worker: `sqlrooms` → `sqlrooms.scientistexperience.net`
+
+**Multi-component projects:**
+- `@sciexp/web` → worker: `myproject-web` → `myproject.scientistexperience.net`
+- `@sciexp/api` → worker: `myproject-api` → `api.myproject.scientistexperience.net`
+- `@sciexp/docs` → worker: `myproject-docs` → `docs.myproject.scientistexperience.net`
+
+### Pattern for template users
+
+**Option A - Single-package projects:**
+```
+Package: @myorg/docs
+Worker:  myproject
+Route:   myproject.example.com
+```
+
+**Option B - Multi-package projects:**
+```
+Package: @myorg/docs
+Worker:  myproject-docs
+Route:   docs.myproject.example.com
+
+Package: @myorg/api
+Worker:  myproject-api
+Route:   api.myproject.example.com
+```
+
+Template structure supports both patterns—it's a routing decision based on project needs.
 
 ## Template user experience
 

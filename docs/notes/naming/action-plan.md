@@ -38,10 +38,10 @@ Find and replace:
 
 ```json
 {
-  "name": "sciexp-docs",
+  "name": "ts-nix-docs",
   "routes": [
     {
-      "pattern": "docs.scientistexperience.net",
+      "pattern": "ts-nix.scientistexperience.net",
       "custom_domain": true
     }
   ]
@@ -170,12 +170,12 @@ git commit -m "refactor(docs): rename to framework-agnostic package name
 
 - Rename @sciexp/starlight-docs → @sciexp/docs
 - Update directory: packages/starlight-docs → packages/docs
-- Update wrangler: sciexp-docs @ docs.scientistexperience.net
+- Update wrangler: ts-nix-docs @ ts-nix.scientistexperience.net
 - Update all documentation and workflow references
 - Update commit scope examples in CONTRIBUTING.md
 
 This change makes the template more framework-agnostic and easier
-to fork while remaining a legitimate deployment for sciexp."
+to fork while preserving top-level subdomain namespace for sciexp."
 ```
 
 ## Push and verify
