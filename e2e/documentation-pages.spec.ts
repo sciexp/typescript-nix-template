@@ -6,9 +6,10 @@ test.describe("Documentation Pages", () => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/guides/example/");
 
-    // Verify sidebar navigation exists
+    // Verify sidebar navigation exists by checking for navigation items within it
     const sidebar = page.locator('nav[aria-label="Main"]');
-    await expect(sidebar).toBeVisible();
+    await expect(sidebar).toBeAttached();
+    await expect(sidebar.getByText("Guides")).toBeVisible();
   });
 
   test("sidebar contains configured navigation items", async ({ page }) => {
