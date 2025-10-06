@@ -1,5 +1,5 @@
 name: setup-nix
-description: Setup Nix with optional disk space optimization
+description: Setup Nix with optional disk space optimization and cachix binary cache configuration
 
 inputs:
   installer:
@@ -20,6 +20,16 @@ inputs:
     type: string
     required: false
     default: system-features = nixos-test benchmark big-parallel kvm
+  setup-cachix:
+    description: Setup cachix binary cache after Nix installation (requires SOPS_AGE_KEY in env)
+    type: boolean
+    required: false
+    default: false
+  cachix-auth:
+    description: Authenticate with cachix for pushing (requires setup-cachix=true)
+    type: boolean
+    required: false
+    default: false
 
 runs:
   using: composite
@@ -79,3 +89,22 @@ runs:
           echo "::group::Disk space after workflow"
           sudo df -h
           echo "::endgroup::"
+
+    - name: Setup and authenticate cachix
+      if: inputs.setup-cachix == 'true' && inputs.cachix-auth == 'true'
+      shell: bash
+      run: |
+        nix develop -c sops exec-env vars/shared.yaml '
+          cachix authtoken "$CACHIX_AUTH_TOKEN"
+          cachix use "$CACHIX_CACHE_NAME"
+          cachix use nix-community
+        '
+
+    - name: Setup cachix for binary cache
+      if: inputs.setup-cachix == 'true' && inputs.cachix-auth != 'true'
+      shell: bash
+      run: |
+        nix develop -c sops exec-env vars/shared.yaml '
+          cachix use "$CACHIX_CACHE_NAME"
+          cachix use nix-community
+        '
