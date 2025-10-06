@@ -1,60 +1,160 @@
-# starlight-nix-template
+# typescript-nix-template
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+TypeScript project template with Nix, Bun workspaces, and semantic-release.
+
+## Overview
+
+This is a monorepo workspace containing TypeScript packages managed with Bun workspaces, Nix for development environments, and semantic-release for automated versioning.
+
+## Packages
+
+- **[@sciexp/starlight-docs](./packages/starlight-docs)**: Astro Starlight documentation site [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+
+## Project structure
 
 ```
-bun create astro@latest -- --template starlight
+typescript-nix-template/
+├── packages/
+│   └── starlight-docs/          # Astro Starlight documentation site
+│       ├── src/
+│       ├── public/
+│       ├── e2e/
+│       ├── tests/
+│       └── package.json
+├── package.json                 # Workspace root configuration
+├── tsconfig.json                # Shared TypeScript configuration
+├── flake.nix                    # Nix development environment
+├── justfile                     # Task runner commands
+└── CONTRIBUTING.md              # Contribution guidelines
 ```
 
-## 🚀 Project Structure
+## Getting started
 
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+### Prerequisites
+
+- [Nix](https://nixos.org/download.html) with flakes enabled
+- [direnv](https://direnv.net/) (recommended)
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/sciexp/typescript-nix-template.git
+cd typescript-nix-template
+
+# Enter Nix development shell
+nix develop
+
+# Install dependencies
+bun install
+```
+
+## Development
+
+### Workspace commands
+
+```bash
+# Install all workspace dependencies
+just install
+
+# Clean all build artifacts
+just clean
+
+# Run command in specific package
+just pkg starlight-docs <command>
+
+# Run command in starlight-docs (shorthand)
+just docs <command>
+```
+
+### Package-specific commands
+
+```bash
+# Start dev server for starlight-docs
+just dev
+
+# Build starlight-docs
+just build
+
+# Run tests
+just test
+
+# Run unit tests
+just test-unit
+
+# Run E2E tests
+just test-e2e
+```
+
+### Using bun directly
+
+```bash
+# Run command in specific package
+bun run --filter '@sciexp/starlight-docs' dev
+bun run --filter '@sciexp/starlight-docs' build
+bun run --filter '@sciexp/starlight-docs' test
+
+# Run command in all packages
+bun run --filter '@sciexp/*' test
+```
+
+## Testing
+
+Comprehensive testing with Vitest and Playwright:
+
+| Command                | Action                                    |
+| :--------------------- | :---------------------------------------- |
+| `just test`            | Run all tests in all packages             |
+| `just test-pkg <name>` | Run tests in specific package             |
+| `just test-unit`       | Run unit tests in starlight-docs          |
+| `just test-e2e`        | Run E2E tests in starlight-docs           |
+| `just test-watch`      | Run Vitest in watch mode                  |
+| `just test-ui`         | Run Playwright in UI mode                 |
+| `just test-coverage`   | Generate test coverage report             |
+
+## Deployment
+
+### Cloudflare Workers
+
+The starlight-docs package deploys to Cloudflare Workers:
+
+```bash
+# Preview locally
+just cf-preview
+
+# Deploy preview for branch
+just cf-deploy-preview <branch>
+
+# Deploy to production
+just cf-deploy-production
+```
+
+## Releases
+
+This project uses [semantic-release](https://semantic-release.gitbook.io/) with [conventional commits](https://www.conventionalcommits.org/) for automated versioning.
+
+### Commit format
 
 ```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
+<type>(<scope>): <subject>
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+### Testing releases
 
-Static assets, like favicons, can be placed in the `public/` directory.
+```bash
+# Test release for specific package
+just test-release starlight-docs
 
-## 🧞 Commands
+# Test release for all packages
+just test-release-all
+```
 
-All commands are run from the root of the project, from a terminal:
+## Contributing
 
-| Command               | Action                                           |
-| :-------------------- | :----------------------------------------------- |
-| `bun install`         | Installs dependencies                            |
-| `bun dev`             | Starts local dev server at `localhost:4321`      |
-| `bun build`           | Build your production site to `./dist/`          |
-| `bun preview`         | Preview your build locally, before deploying     |
-| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `bun astro -- --help` | Get help using the Astro CLI                     |
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines and conventional commit format.
 
-## 🧪 Testing
+## License
 
-This project includes comprehensive testing with Vitest and Playwright.
-
-| Command                 | Action                                    |
-| :---------------------- | :---------------------------------------- |
-| `just test`             | Run all tests (unit + E2E)                |
-| `just test-unit`        | Run unit tests with Vitest                |
-| `just test-e2e`         | Run E2E tests with Playwright             |
-| `just test-watch`       | Run Vitest in watch mode                  |
-| `just test-ui`          | Run Playwright in UI mode                 |
-| `just test-coverage`    | Generate test coverage report             |
-
-## 👀 Want to learn more?
-
-Check out [Starlight's docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+MIT
