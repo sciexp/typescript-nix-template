@@ -201,13 +201,13 @@ jobs:
           system: x86_64-linux
           setup-cachix: true
       - name: Install dependencies
-        run: nix develop -c bun install
+        run: nix develop -c just install
       - name: Run unit tests
-        run: nix develop -c bun run --filter '@sciexp/${{ matrix.package.name }}' test:unit
+        run: nix develop -c just test-unit
       - name: Build for E2E tests
-        run: nix develop -c bun run --filter '@sciexp/${{ matrix.package.name }}' build
+        run: nix develop -c just build
       - name: Run E2E tests
-        run: nix develop -c bun run --filter '@sciexp/${{ matrix.package.name }}' test:e2e
+        run: nix develop -c just test-e2e
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
