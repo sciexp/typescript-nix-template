@@ -121,7 +121,7 @@ jobs:
           echo "CHECKOUT_REF=$CHECKOUT_REF" >> $GITHUB_OUTPUT
           echo "CHECKOUT_REV=$CHECKOUT_REV" >> $GITHUB_OUTPUT
 
-  nixci:
+  nix:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
