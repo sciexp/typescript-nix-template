@@ -245,9 +245,7 @@ cf-deploy-preview branch=`git branch --show-current`:
     echo 'Building...'
     bun run build
     echo 'Uploading version with preview alias...'
-    bunx wrangler versions upload --preview-alias {{branch}}
-    echo ''
-    echo 'Preview URL: https://{{branch}}-starlight-nix-template.<subdomain>.workers.dev'
+    bunx wrangler versions upload --preview-alias b-{{branch}}
   "
 
 # Deploy to production (immediate 100% rollout)
