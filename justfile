@@ -236,70 +236,53 @@ cf-preview:
 cf-build-deploy: install
   bun run deploy
 
-# Deploy preview version to Cloudflare (does not affect production)
+# Deploy preview version to Cloudflare Pages (does not affect production)
 [group('cloudflare')]
 cf-deploy-preview branch=`git branch --show-current`:
   #!/usr/bin/env bash
   sops exec-env vars/shared.yaml "
     echo 'Deploying preview for branch: {{branch}}'
-    OUTPUT=\$(bunx wrangler versions upload --preview-alias b-{{branch}})
-    echo \"\$OUTPUT\"
-    VERSION_ID=\$(echo \"\$OUTPUT\" | grep -oP 'Version ID: \K[a-f0-9-]+')
-    if [ -n \"\$VERSION_ID\" ]; then
-      echo ''
-      echo 'Preview deployed successfully!'
-      echo 'To rollout to production, run:'
-      echo \"  just cf-rollout \$VERSION_ID\"
-      echo ''
-      echo 'For gradual rollout, use traffic percentage:'
-      echo \"  just cf-rollout \$VERSION_ID 10   # 10% traffic\"
-      echo \"  just cf-rollout \$VERSION_ID 50   # 50% traffic\"
-      echo \"  just cf-rollout \$VERSION_ID 100  # 100% traffic\"
-    fi
+    bunx wrangler pages deploy dist/ \
+      --project-name=starlight-nix-template \
+      --branch={{branch}} \
+      --commit-dirty=true
   "
 
-# Deploy to production (upload version and rollout to 100%)
+# Deploy to production on Cloudflare Pages
 [group('cloudflare')]
 cf-deploy-production branch=`git branch --show-current`:
   #!/usr/bin/env bash
   sops exec-env vars/shared.yaml "
     echo 'Deploying production version for branch: {{branch}}'
-    OUTPUT=\$(bunx wrangler versions upload)
-    echo \"\$OUTPUT\"
-    VERSION_ID=\$(echo \"\$OUTPUT\" | grep -oP 'Version ID: \K[a-f0-9-]+')
-    if [ -n \"\$VERSION_ID\" ]; then
-      echo ''
-      echo \"Deploying version \$VERSION_ID to production (100% traffic)\"
-      bunx wrangler versions deploy \${VERSION_ID}@100 --yes
-    else
-      echo 'Error: Could not extract version ID'
-      exit 1
-    fi
+    bunx wrangler pages deploy dist/ \
+      --project-name=starlight-nix-template \
+      --branch={{branch}} \
+      --commit-dirty=true
   "
 
-# Rollout version to production with optional traffic percentage (default 100%)
+# List recent Cloudflare Pages deployments
 [group('cloudflare')]
-cf-rollout version_id percentage="100":
-  sops exec-env vars/shared.yaml "bunx wrangler versions deploy {{version_id}}@{{percentage}} --yes"
+cf-deployments limit="10":
+  sops exec-env vars/shared.yaml "bunx wrangler pages deployment list --project-name=starlight-nix-template"
 
-# List recent Cloudflare Workers versions
+# Get latest deployment ID from Cloudflare Pages
 [group('cloudflare')]
-cf-versions limit="10":
-  sops exec-env vars/shared.yaml "bunx wrangler versions list --limit {{limit}}"
+cf-deployment-latest:
+  @sops exec-env vars/shared.yaml "bunx wrangler pages deployment list --project-name=starlight-nix-template --json | jq -r '.[0].id'"
 
-# Get latest version ID from Cloudflare
+# Promote a specific deployment to production
 [group('cloudflare')]
-cf-version-latest:
-  @sops exec-env vars/shared.yaml "bunx wrangler versions list --limit 1 --json" | jq -r '.[0].id'
+cf-promote deployment_id:
+  sops exec-env vars/shared.yaml "bunx wrangler pages deployment promote {{deployment_id}} --project-name=starlight-nix-template"
 
-# Rollback to previous version (100% traffic)
+# Rollback to previous deployment (promote the second most recent)
 [group('cloudflare')]
 cf-rollback:
   #!/usr/bin/env bash
   sops exec-env vars/shared.yaml "
-    PREV_VERSION=\$(bunx wrangler versions list --limit 2 --json | jq -r '.[1].id')
-    echo \"Rolling back to version: \$PREV_VERSION\"
-    bunx wrangler versions deploy \${PREV_VERSION}@100 --yes
+    PREV_DEPLOYMENT=\$(bunx wrangler pages deployment list --project-name=starlight-nix-template --json | jq -r '.[1].id')
+    echo \"Rolling back to deployment: \$PREV_DEPLOYMENT\"
+    bunx wrangler pages deployment promote \$PREV_DEPLOYMENT --project-name=starlight-nix-template
   "
 
 # Generate Cloudflare Worker types
