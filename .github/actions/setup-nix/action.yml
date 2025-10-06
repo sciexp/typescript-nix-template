@@ -1,7 +1,15 @@
 name: setup-nix
-description: Setup Nix with disk space optimization
+description: Setup Nix with optional disk space optimization
 
 inputs:
+  installer:
+    description: |
+      Nix installation strategy:
+      - 'full' (default): Aggressive disk cleanup + DeterminateSystems installer
+      - 'quick': Lightweight install with nixbuild/nix-quick-install-action
+    type: string
+    required: false
+    default: full
   system:
     description: Nix system to configure (e.g., x86_64-linux, aarch64-darwin)
     type: string
@@ -16,14 +24,15 @@ inputs:
 runs:
   using: composite
   steps:
+    # Full installer: Aggressive disk cleanup + DeterminateSystems
     - name: Reclaim disk space (Linux)
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && inputs.installer == 'full'
       uses: wimpysworld/nothing-but-nix@main
       with:
         hatchet-protocol: rampage
 
     - name: Reclaim disk space (macOS)
-      if: runner.os == 'macOS'
+      if: runner.os == 'macOS' && inputs.installer == 'full'
       shell: bash
       run: |
         echo "::group::Disk space before cleanup"
@@ -48,15 +57,21 @@ runs:
           /Users/runner/Library/Developer/CoreSimulator \
           /Users/runner/hostedtoolcache &
 
-    - name: Install Nix
+    - name: Install Nix (DeterminateSystems)
+      if: inputs.installer == 'full'
       uses: DeterminateSystems/nix-installer-action@main
       with:
         extra-conf: |
           system = ${{ inputs.system }}
           ${{ inputs.extra-conf }}
 
+    # Quick installer: Lightweight nixbuild/nix-quick-install-action
+    - name: Install Nix (Quick Install)
+      if: inputs.installer == 'quick'
+      uses: nixbuild/nix-quick-install-action@master
+
     - name: Report disk space (macOS post-cleanup)
-      if: runner.os == 'macOS'
+      if: runner.os == 'macOS' && inputs.installer == 'full'
       uses: srz-zumix/post-run-action@v2
       with:
         shell: bash -e {0}
