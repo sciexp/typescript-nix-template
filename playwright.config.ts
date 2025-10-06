@@ -1,3 +1,4 @@
+import os from "node:os";
 import { defineConfig, devices } from "@playwright/test";
 
 /**
@@ -17,8 +18,8 @@ export default defineConfig({
   // Retry on CI only
   retries: process.env.CI ? 2 : 0,
 
-  // Use 3 workers on CI for faster execution
-  workers: process.env.CI ? 3 : undefined,
+  // Use all available CPU cores locally, 3 workers in CI for faster execution
+  workers: process.env.CI ? 3 : os.cpus().length,
 
   // Reporter configuration
   reporter: process.env.CI
