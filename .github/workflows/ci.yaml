@@ -182,8 +182,13 @@ jobs:
        inputs.job == '' ||
        inputs.job == 'test')
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - name: starlight-docs
+            path: packages/starlight-docs
     concurrency:
-      group: test-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
+      group: test-${{ matrix.package.name }}-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
@@ -196,33 +201,33 @@ jobs:
           system: x86_64-linux
           setup-cachix: true
       - name: Install dependencies
-        run: nix develop -c just install
+        run: nix develop -c bun install
       - name: Run unit tests
-        run: nix develop -c just test-unit
+        run: nix develop -c bun run --filter '@sciexp/${{ matrix.package.name }}' test:unit
       - name: Build for E2E tests
-        run: nix develop -c just build
+        run: nix develop -c bun run --filter '@sciexp/${{ matrix.package.name }}' build
       - name: Run E2E tests
-        run: nix develop -c just test-e2e
+        run: nix develop -c bun run --filter '@sciexp/${{ matrix.package.name }}' test:e2e
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: dist/
+          name: dist-${{ matrix.package.name }}
+          path: ${{ matrix.package.path }}/dist/
           retention-days: 7
           include-hidden-files: true
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: playwright-report-${{ matrix.package.name }}
+          path: ${{ matrix.package.path }}/playwright-report/
           retention-days: 7
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage
-          path: coverage/
+          name: coverage-${{ matrix.package.name }}
+          path: ${{ matrix.package.path }}/coverage/
           retention-days: 7
 
   deploy:
