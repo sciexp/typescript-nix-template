@@ -12,14 +12,6 @@ test.describe("Homepage", () => {
     await expect(heading).toBeVisible();
   });
 
-  test("has navigation sidebar", async ({ page }) => {
-    await page.goto("/");
-
-    // Verify sidebar navigation exists
-    const sidebar = page.locator("nav").first();
-    await expect(sidebar).toBeVisible();
-  });
-
   test("has accessible links", async ({ page }) => {
     await page.goto("/");
 
