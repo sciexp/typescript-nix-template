@@ -197,14 +197,14 @@ jobs:
         run: nix develop -c just test-e2e
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5e6e6e5e2c0b89a5b0c5d5c9c3f5 # ratchet:actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@65c4c4a1ddee5e6e6e5e2c0b89a5b0c5d5c9c3f5 # ratchet:actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage/
@@ -238,7 +238,7 @@ jobs:
       - name: Build documentation site
         run: nix build .#docs
       - name: Upload build artifacts
-        uses: actions/upload-artifact@65c4c4a1ddee5e6e6e5e2c0b89a5b0c5d5c9c3f5 # ratchet:actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: result/
