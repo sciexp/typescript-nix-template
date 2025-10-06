@@ -3,29 +3,53 @@ default:
     @just --list
 
 # Contents
+## Workspace
 ## CI/CD
 ## Cloudflare
 ## Docs
 ## Nix
+## Release
 ## Secrets
 ## Testing
+
+## Workspace
+
+# Install all workspace dependencies
+[group('workspace')]
+install:
+  bun install
+
+# Clean all workspace build artifacts
+[group('workspace')]
+clean:
+  rm -rf packages/*/dist packages/*/node_modules
+
+# Run command in specific package
+[group('workspace')]
+pkg package +command:
+  cd packages/{{ package }} && {{ command }}
+
+# Run command in starlight-docs package
+[group('workspace')]
+docs +command:
+  cd packages/starlight-docs && {{ command }}
 
 ## CI/CD
 
 # Format code with Biome
 [group('CI/CD')]
 format:
-  bun run format
+  cd packages/starlight-docs && bun run format
 
 # Lint code with Biome
 [group('CI/CD')]
 lint:
-  bun run lint
+  cd packages/starlight-docs && bun run lint
 
 # Check and fix code with Biome
 [group('CI/CD')]
 check:
-  bun run check:fix
+  cd packages/starlight-docs && bun run check:fix
 
 # Run pre-commit hooks
 [group('CI/CD')]
@@ -229,18 +253,19 @@ gh-cancel run_id="":
 # Preview the site locally with Cloudflare Workers
 [group('cloudflare')]
 cf-preview:
-  bun run preview
+  bun run --filter '@sciexp/starlight-docs' preview
 
 # Build and deploy the site to Cloudflare Workers
 [group('cloudflare')]
 cf-build-deploy: install
-  bun run deploy
+  bun run --filter '@sciexp/starlight-docs' deploy
 
 # Deploy preview version with aliased preview URL for branch
 [group('cloudflare')]
 cf-deploy-preview branch=`git branch --show-current`:
   #!/usr/bin/env bash
-  sops exec-env vars/shared.yaml "
+  cd packages/starlight-docs
+  sops exec-env ../../vars/shared.yaml "
     echo 'Deploying preview for branch: {{branch}}'
     echo 'Building...'
     bun run build
@@ -252,7 +277,8 @@ cf-deploy-preview branch=`git branch --show-current`:
 [group('cloudflare')]
 cf-deploy-production:
   #!/usr/bin/env bash
-  sops exec-env vars/shared.yaml "
+  cd packages/starlight-docs
+  sops exec-env ../../vars/shared.yaml "
     echo 'Building and deploying to production...'
     bun run build
     bunx wrangler deploy
@@ -261,61 +287,56 @@ cf-deploy-production:
 # List recent versions
 [group('cloudflare')]
 cf-versions limit="10":
-  sops exec-env vars/shared.yaml "bunx wrangler versions list --limit {{limit}}"
+  cd packages/starlight-docs && sops exec-env ../../vars/shared.yaml "bunx wrangler versions list --limit {{limit}}"
 
 # View specific version details
 [group('cloudflare')]
 cf-version-view version_id:
-  sops exec-env vars/shared.yaml "bunx wrangler versions view {{version_id}}"
+  cd packages/starlight-docs && sops exec-env ../../vars/shared.yaml "bunx wrangler versions view {{version_id}}"
 
 # Deploy specific version(s) with traffic split (gradual deployment)
 [group('cloudflare')]
 cf-versions-deploy:
-  sops exec-env vars/shared.yaml "bunx wrangler versions deploy"
+  cd packages/starlight-docs && sops exec-env ../../vars/shared.yaml "bunx wrangler versions deploy"
 
 # Tail live logs from Cloudflare Workers
 [group('cloudflare')]
 cf-tail:
-  sops exec-env vars/shared.yaml "bunx wrangler tail"
+  cd packages/starlight-docs && sops exec-env ../../vars/shared.yaml "bunx wrangler tail"
 
 # List deployments
 [group('cloudflare')]
 cf-deployments:
-  sops exec-env vars/shared.yaml "bunx wrangler deployments list"
+  cd packages/starlight-docs && sops exec-env ../../vars/shared.yaml "bunx wrangler deployments list"
 
 # Generate Cloudflare Worker types
 # Note: --include-runtime=false works around wrangler 4.42.0 EPIPE bug
 # Runtime types are only for IDE autocomplete; production builds don't need them
 [group('cloudflare')]
 cf-types:
-  bun run cf-typegen --include-runtime=false
+  cd packages/starlight-docs && bun run cf-typegen --include-runtime=false
 
 ## Docs
 
 # Start development server
 [group('docs')]
 dev:
-  bun run dev
+  bun run --filter '@sciexp/starlight-docs' dev
 
 # Build the documentation site
 [group('docs')]
 build:
-  bun run build
+  bun run --filter '@sciexp/starlight-docs' build
 
 # Preview the built site
 [group('docs')]
 preview:
-  bun run preview
-
-# Install dependencies
-[group('docs')]
-install:
-  bun install
+  bun run --filter '@sciexp/starlight-docs' preview
 
 # Optimize favicon.svg with SVGO
 [group('docs')]
 optimize-favicon:
-  bunx svgo public/favicon.svg --multipass
+  bunx svgo packages/starlight-docs/public/favicon.svg --multipass
 
 ## Nix
 
@@ -338,6 +359,21 @@ flake-update:
 [group('nix')]
 nix-build:
     nix build .#docs
+
+## Release
+
+# Test semantic release (dry run) for specific package
+[group('release')]
+test-release package="starlight-docs":
+  cd packages/{{ package }} && bun run test-release
+
+# Test semantic release for all packages
+[group('release')]
+test-release-all:
+  @for pkg in packages/*; do \
+    echo "Testing release for $pkg"; \
+    cd "$pkg" && bun run test-release && cd ../..; \
+  done
 
 ## Secrets
 
@@ -513,35 +549,40 @@ sops-rotate role='dev':
 
 ## Testing
 
-# Run all tests (unit and E2E)
+# Run all tests in all packages
 [group('testing')]
 test:
-  bun run test
+  bun run --filter '@sciexp/*' test
 
-# Run unit tests with vitest
+# Run tests in specific package
+[group('testing')]
+test-pkg package:
+  bun run --filter '@sciexp/{{ package }}' test
+
+# Run unit tests in starlight-docs
 [group('testing')]
 test-unit:
-  bun run test:unit
+  bun run --filter '@sciexp/starlight-docs' test:unit
 
-# Run E2E tests with playwright
+# Run E2E tests in starlight-docs
 [group('testing')]
 test-e2e:
-  bun run test:e2e
+  bun run --filter '@sciexp/starlight-docs' test:e2e
 
 # Run vitest in watch mode
 [group('testing')]
 test-watch:
-  bun run test:watch
+  bun run --filter '@sciexp/starlight-docs' test:watch
 
 # Run playwright in UI mode
 [group('testing')]
 test-ui:
-  bun run test:ui
+  bun run --filter '@sciexp/starlight-docs' test:ui
 
 # Generate test coverage report
 [group('testing')]
 test-coverage:
-  bun run test:coverage
+  bun run --filter '@sciexp/starlight-docs' test:coverage
 
 # Install playwright browsers (only needed outside Nix environment)
 # The Nix devshell provides browsers via playwright-driver.browsers
