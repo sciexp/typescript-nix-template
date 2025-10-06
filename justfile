@@ -50,6 +50,7 @@ ghvars repo="":
   PAGER=cat gh variable list --repo="$REPO"
 
 # Update github secrets for repo from sops-encrypted secrets
+# Note: SOPS_AGE_KEY is uploaded separately via sops-upload-github-key
 [group('CI/CD')]
 ghsecrets repo="":
   #!/usr/bin/env bash
@@ -62,13 +63,15 @@ ghsecrets repo="":
   gh secret set CACHIX_AUTH_TOKEN --repo='"$REPO"' --body="$CACHIX_AUTH_TOKEN" && \
   gh secret set GITGUARDIAN_API_KEY --repo='"$REPO"' --body="$GITGUARDIAN_API_KEY" && \
   gh secret set CLOUDFLARE_ACCOUNT_ID --repo='"$REPO"' --body="$CLOUDFLARE_ACCOUNT_ID" && \
-  gh secret set CLOUDFLARE_API_TOKEN --repo='"$REPO"' --body="$CLOUDFLARE_API_TOKEN" && \
-  gh secret set SOPS_AGE_KEY --repo='"$REPO"' --body="$CI_AGE_KEY"'
+  gh secret set CLOUDFLARE_API_TOKEN --repo='"$REPO"' --body="$CLOUDFLARE_API_TOKEN"'
   echo
   echo "secrets after updates (wait 3 seconds for github to update):"
   sleep 3
   echo
   PAGER=cat gh secret list --repo="$REPO"
+  echo
+  echo "ℹ️  SOPS_AGE_KEY not uploaded (requires special handling)"
+  echo "   Upload with: just sops-upload-github-key"
 
 # List available workflows and associated jobs using act
 [group('CI/CD')]
