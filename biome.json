@@ -9,7 +9,8 @@
       "packages/*/*.config.mjs",
       "packages/*/*.config.ts",
       "packages/*/package.json",
-      "package.json"
+      "package.json",
+      ".github/**/*.json"
     ]
   },
   "formatter": {
