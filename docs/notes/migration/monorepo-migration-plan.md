@@ -11,8 +11,8 @@ This document outlines the complete migration of the `starlight-nix-template` re
 - New: `typescript-nix-template`
 
 ### Packages
-- Package 1 (current codebase): `@sciexp/starlight-docs`
-  - Location: `packages/starlight-docs/`
+- Package 1 (current codebase): `@sciexp/docs`
+  - Location: `packages/docs/`
   - Description: Astro Starlight documentation site
 - Package 2 (future addition): `@sciexp/sqlrooms-hf-ducklake`
   - Location: `packages/sqlrooms-hf-ducklake/`
@@ -45,7 +45,7 @@ Following python-nix-template convention:
 ### Tag strategy
 Following python-nix-template pattern with scoped tags:
 - Root-level tags: `v1.0.0`, `v1.0`, `v1` (from semantic-release-major-tag)
-- Package-specific tags: `starlight-docs-v1.0.0`, `starlight-docs-v1.0`, `starlight-docs-v1`
+- Package-specific tags: `docs-v1.0.0`, `docs-v1.0`, `docs-v1`
 - Second package will use: `sqlrooms-hf-ducklake-v1.0.0`, etc.
 - All tags created automatically by semantic-release when enabled
 
@@ -54,11 +54,11 @@ Following python-nix-template pattern with scoped tags:
 - Document conventional commit format in CONTRIBUTING.md
 - Required format: `<type>(<scope>): <subject>`
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
-  - Scope: package name (e.g., `starlight-docs`, `sqlrooms-hf-ducklake`)
+  - Scope: package name (e.g., `docs`, `sqlrooms-hf-ducklake`)
   - Examples:
-    - `feat(starlight-docs): add dark mode toggle`
+    - `feat(docs): add dark mode toggle`
     - `fix(sqlrooms-hf-ducklake): handle null values in query results`
-    - `docs(starlight-docs): update installation guide`
+    - `docs: update installation guide`
 
 ### Workspace structure rationale
 - Use `packages/` directory (not `apps/` + `packages/`) to match python-nix-template
@@ -71,7 +71,7 @@ Following python-nix-template pattern with scoped tags:
 ```
 typescript-nix-template/
 ├── packages/
-│   └── starlight-docs/              # Renamed and relocated from root
+│   └── docs/                        # Renamed and relocated from root
 │       ├── src/                     # Moved from root
 │       ├── public/                  # Moved from root
 │       ├── e2e/                     # Moved from root
@@ -222,11 +222,11 @@ typescript-nix-template/
 }
 ```
 
-### packages/starlight-docs/package.json
+### packages/docs/package.json
 
 ```json
 {
-  "name": "@sciexp/starlight-docs",
+  "name": "@sciexp/docs",
   "version": "0.0.0-development",
   "private": true,
   "description": "Starlight documentation site for sciexp projects",
@@ -331,8 +331,8 @@ typescript-nix-template/
         "semantic-release-major-tag",
         {
           "customTags": [
-            "starlight-docs-v${major}",
-            "starlight-docs-v${major}.${minor}"
+            "docs-v${major}",
+            "docs-v${major}.${minor}"
           ]
         }
       ]
@@ -362,7 +362,7 @@ typescript-nix-template/
 }
 ```
 
-### packages/starlight-docs/tsconfig.json
+### packages/docs/tsconfig.json
 
 ```json
 {
@@ -450,8 +450,8 @@ jobs:
       max-parallel: 1
       matrix:
         package:
-          - name: starlight-docs
-            path: packages/starlight-docs
+          - name: docs
+            path: packages/docs
           # Add future packages here:
           # - name: sqlrooms-hf-ducklake
           #   path: packages/sqlrooms-hf-ducklake
@@ -513,8 +513,8 @@ jobs:
     strategy:
       matrix:
         package:
-          - name: starlight-docs
-            path: packages/starlight-docs
+          - name: docs
+            path: packages/docs
     concurrency:
       group: test-${{ matrix.package.name }}-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
       cancel-in-progress: true
@@ -564,7 +564,7 @@ jobs:
 
 ### .github/workflows/deploy-docs.yaml (updated paths)
 
-Update all paths to reference `packages/starlight-docs/`:
+Update all paths to reference `packages/docs/`:
 
 ```yaml
 # Example updates needed:
@@ -572,14 +572,14 @@ Update all paths to reference `packages/starlight-docs/`:
   run: nix develop -c bun install
 
 - name: Build
-  run: nix develop -c bun run --filter '@sciexp/starlight-docs' build
+  run: nix develop -c bun run --filter '@sciexp/docs' build
 
 - name: Deploy
   env:
     CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
   run: |
-    cd packages/starlight-docs
+    cd packages/docs
     nix develop -c bunx wrangler deploy
 ```
 
@@ -607,10 +607,10 @@ clean:
 pkg package +command:
   cd packages/{{ package }} && {{ command }}
 
-# Run command in starlight-docs package
+# Run command in docs package
 [group('workspace')]
 docs +command:
-  cd packages/starlight-docs && {{ command }}
+  cd packages/docs && {{ command }}
 
 ## Testing (updated)
 
@@ -624,21 +624,21 @@ test:
 test-pkg package:
   bun run --filter '@sciexp/{{ package }}' test
 
-# Run unit tests in starlight-docs
+# Run unit tests in docs
 [group('testing')]
 test-unit:
-  bun run --filter '@sciexp/starlight-docs' test:unit
+  bun run --filter '@sciexp/docs' test:unit
 
-# Run E2E tests in starlight-docs
+# Run E2E tests in docs
 [group('testing')]
 test-e2e:
-  bun run --filter '@sciexp/starlight-docs' test:e2e
+  bun run --filter '@sciexp/docs' test:e2e
 
 ## Release
 
 # Test semantic release (dry run) for specific package
 [group('release')]
-test-release package="starlight-docs":
+test-release package="docs":
   cd packages/{{ package }} && bun run test-release
 
 # Test semantic release for all packages
@@ -654,17 +654,17 @@ test-release-all:
 # Start development server
 [group('docs')]
 dev:
-  bun run --filter '@sciexp/starlight-docs' dev
+  bun run --filter '@sciexp/docs' dev
 
 # Build the documentation site
 [group('docs')]
 build:
-  bun run --filter '@sciexp/starlight-docs' build
+  bun run --filter '@sciexp/docs' build
 
 # Preview the built site
 [group('docs')]
 preview:
-  bun run --filter '@sciexp/starlight-docs' preview
+  bun run --filter '@sciexp/docs' preview
 
 # ... rest of justfile with updated paths ...
 ```
@@ -690,41 +690,41 @@ git checkout -b 00-migrate-to-monorepo
 
 ```bash
 # Create packages directory
-mkdir -p packages/starlight-docs
+mkdir -p packages/docs
 
 # Create documentation directory for this plan
 mkdir -p docs/notes/migration
 ```
 
-### Step 3: Move files to packages/starlight-docs/
+### Step 3: Move files to packages/docs/
 
 ```bash
 # Move source directories
-mv src packages/starlight-docs/
-mv public packages/starlight-docs/
-mv e2e packages/starlight-docs/
-mv tests packages/starlight-docs/
+mv src packages/docs/
+mv public packages/docs/
+mv e2e packages/docs/
+mv tests packages/docs/
 
 # Move configuration files
-mv astro.config.mjs packages/starlight-docs/
-mv wrangler.jsonc packages/starlight-docs/
-mv worker-configuration.d.ts packages/starlight-docs/
-mv biome.json packages/starlight-docs/
-mv vitest.config.ts packages/starlight-docs/
-mv playwright.config.ts packages/starlight-docs/
+mv astro.config.mjs packages/docs/
+mv wrangler.jsonc packages/docs/
+mv worker-configuration.d.ts packages/docs/
+mv biome.json packages/docs/
+mv vitest.config.ts packages/docs/
+mv playwright.config.ts packages/docs/
 
 # Copy tsconfig.json to root (will be modified as base config)
 cp tsconfig.json tsconfig.base.json
-mv tsconfig.json packages/starlight-docs/
+mv tsconfig.json packages/docs/
 ```
 
 ### Step 4: Create new configuration files
 
 Create files according to specifications above:
 - Root `package.json` (workspace config)
-- `packages/starlight-docs/package.json`
+- `packages/docs/package.json`
 - Root `tsconfig.json` (base config)
-- Update `packages/starlight-docs/tsconfig.json` to extend root
+- Update `packages/docs/tsconfig.json` to extend root
 - Update `flake.nix` description
 
 ### Step 5: Update GitHub Actions
@@ -743,7 +743,7 @@ Add workspace commands and update existing commands for new structure.
 ```bash
 # Update README.md with monorepo structure
 # Create CONTRIBUTING.md with conventional commit guidelines
-# Create packages/starlight-docs/README.md
+# Create packages/docs/README.md
 ```
 
 ### Step 8: Install dependencies
@@ -760,7 +760,7 @@ ls -la bun.lockb
 
 ```bash
 # Test build
-cd packages/starlight-docs
+cd packages/docs
 bun run build
 
 # Test unit tests
@@ -783,10 +783,10 @@ nix develop
 bun install
 
 # Run tests
-bun run --filter '@sciexp/starlight-docs' test
+bun run --filter '@sciexp/docs' test
 
 # Build
-bun run --filter '@sciexp/starlight-docs' build
+bun run --filter '@sciexp/docs' build
 
 # Exit dev shell
 exit
@@ -799,7 +799,7 @@ exit
 bun run test-release
 
 # Test at package level
-cd packages/starlight-docs
+cd packages/docs
 bun run test-release
 cd ../..
 ```
@@ -824,8 +824,8 @@ git add .
 git commit -m "refactor: migrate to bun monorepo with semantic-release
 
 - Rename repository to typescript-nix-template
-- Rename main package to @sciexp/starlight-docs
-- Move package to packages/starlight-docs/
+- Rename main package to @sciexp/docs
+- Move package to packages/docs/
 - Add workspace configuration in root package.json
 - Add semantic-release configuration (disabled)
 - Update GitHub Actions workflows for monorepo
@@ -848,7 +848,7 @@ gh pr create --title "refactor: migrate to bun monorepo with semantic-release" \
 
 ## Changes
 - Repository renamed to typescript-nix-template
-- Package renamed to @sciexp/starlight-docs
+- Package renamed to @sciexp/docs
 - Workspace structure created with packages/ directory
 - Semantic-release configured (disabled initially)
 - GitHub Actions updated for monorepo
@@ -897,11 +897,11 @@ git checkout main
 git pull
 
 # Verify structure
-ls -la packages/starlight-docs/
+ls -la packages/docs/
 
 # Test again
 nix develop -c bun install
-nix develop -c bun run --filter '@sciexp/starlight-docs' test
+nix develop -c bun run --filter '@sciexp/docs' test
 ```
 
 ## Adding second package (future)
@@ -1027,8 +1027,8 @@ Uncomment the second package in the matrix:
 ```yaml
 matrix:
   package:
-    - name: starlight-docs
-      path: packages/starlight-docs
+    - name: docs
+      path: packages/docs
     - name: sqlrooms-hf-ducklake
       path: packages/sqlrooms-hf-ducklake
 ```
@@ -1039,8 +1039,8 @@ Add second package to test matrix:
 ```yaml
 matrix:
   package:
-    - name: starlight-docs
-      path: packages/starlight-docs
+    - name: docs
+      path: packages/docs
     - name: sqlrooms-hf-ducklake
       path: packages/sqlrooms-hf-ducklake
 ```
@@ -1102,7 +1102,7 @@ After enabling, the next conventional commit to main will trigger:
 2. Determines version bump (patch/minor/major)
 3. Generates CHANGELOG.md
 4. Creates GitHub release with notes
-5. Creates tags (e.g., `starlight-docs-v0.1.0`, `v0.1`, `v0`)
+5. Creates tags (e.g., `docs-v0.1.0`, `v0.1`, `v0`)
 6. Commits CHANGELOG.md back with [skip ci]
 
 Verify in GitHub:
@@ -1139,28 +1139,28 @@ Verify in GitHub:
 - Or use `!` after type: `feat(api)!: remove deprecated endpoint`
 
 **Scope:**
-- Use package name: `starlight-docs`, `sqlrooms-hf-ducklake`
+- Use package name: `docs`, `sqlrooms-hf-ducklake`
 - Or component name within package
 - Or omit for cross-cutting changes
 
 **Examples:**
 ```bash
 # Feature in specific package
-feat(starlight-docs): add search functionality
+feat(docs): add search functionality
 
 # Bug fix with scope
 fix(sqlrooms-hf-ducklake): handle null values in query results
 
 # Breaking change
-feat(starlight-docs)!: migrate to Astro 5
+feat(docs)!: migrate to Astro 5
 
 BREAKING CHANGE: Astro 5 requires Node 18+
 
 # Multiple scopes affected
-refactor(starlight-docs,sqlrooms-hf-ducklake): update typescript to 5.9
+refactor(docs,sqlrooms-hf-ducklake): update typescript to 5.9
 
 # Documentation
-docs(starlight-docs): update installation guide
+docs: update installation guide
 
 # Chore
 chore: update dependencies
@@ -1171,8 +1171,8 @@ chore: update dependencies
 Before considering migration complete:
 
 - [ ] Repository renamed to typescript-nix-template
-- [ ] Package renamed to @sciexp/starlight-docs
-- [ ] All files moved to packages/starlight-docs/
+- [ ] Package renamed to @sciexp/docs
+- [ ] All files moved to packages/docs/
 - [ ] Root package.json configured as workspace
 - [ ] Package-specific package.json created
 - [ ] tsconfig structure created (root + package)
