@@ -132,7 +132,7 @@ jobs:
         id: deployment
         run: |
           if [ "${{ inputs.environment }}" = "preview" ]; then
-            nix develop -c just cf-deploy-preview branch=${{ inputs.branch }}
+            nix develop -c just cf-deploy-preview ${{ inputs.branch }}
           else
             # For production, upload and immediately rollout to 100%
             OUTPUT=$(nix develop -c bunx wrangler versions upload --preview-alias b-${{ inputs.branch }})
