@@ -54,6 +54,7 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
         with:
+          installer: quick
           system: x86_64-linux
 
       - name: Setup remote cache
@@ -102,6 +103,7 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
         with:
+          installer: quick
           system: x86_64-linux
 
       - name: Setup remote cache

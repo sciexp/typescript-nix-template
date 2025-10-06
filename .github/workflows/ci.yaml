@@ -7,6 +7,14 @@ on:
         description: "Specific job to run (leave empty for all)"
         type: string
         required: false
+      nix_installer:
+        description: "Nix installer strategy"
+        type: choice
+        options:
+          - full
+          - quick
+        default: full
+        required: false
       debug_enabled:
         description: "Run the workflow with tmate.io debugging enabled"
         required: true
@@ -144,6 +152,7 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
         with:
+          installer: ${{ inputs.nix_installer || 'full' }}
           system: x86_64-linux
       - name: Setup remote cache
         uses: cachix/cachix-action@be5295a636153b6ad194d3245f78f8e0b78dc704 # ratchet:cachix/cachix-action@master
@@ -179,6 +188,7 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
         with:
+          installer: ${{ inputs.nix_installer || 'quick' }}
           system: x86_64-linux
       - name: Setup remote cache
         uses: cachix/cachix-action@be5295a636153b6ad194d3245f78f8e0b78dc704 # ratchet:cachix/cachix-action@master
@@ -227,6 +237,7 @@ jobs:
       - name: Setup Nix
         uses: ./.github/actions/setup-nix
         with:
+          installer: ${{ inputs.nix_installer || 'quick' }}
           system: x86_64-linux
       - name: Setup remote cache
         uses: cachix/cachix-action@be5295a636153b6ad194d3245f78f8e0b78dc704 # ratchet:cachix/cachix-action@master
