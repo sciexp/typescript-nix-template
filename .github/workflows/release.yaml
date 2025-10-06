@@ -37,8 +37,8 @@ jobs:
       max-parallel: 1
       matrix:
         package:
-          - name: starlight-docs
-            path: packages/starlight-docs
+          - name: docs
+            path: packages/docs
           # Add future packages here:
           # - name: sqlrooms-hf-ducklake
           #   path: packages/sqlrooms-hf-ducklake
