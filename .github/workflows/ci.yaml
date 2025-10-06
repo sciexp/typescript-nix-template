@@ -213,6 +213,13 @@ jobs:
         run: nix develop -c just build
       - name: Run E2E tests
         run: nix develop -c just test-e2e
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+          include-hidden-files: true
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -228,47 +235,8 @@ jobs:
           path: coverage/
           retention-days: 7
 
-  build:
-    needs: [set-variables]
-    if: |
-      !cancelled() &&
-      needs.set-variables.outputs.skip_ci != 'true' &&
-      (github.event_name != 'workflow_dispatch' ||
-       inputs.job == '' ||
-       inputs.job == 'build')
-    runs-on: ubuntu-latest
-    concurrency:
-      group: build-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
-      cancel-in-progress: true
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
-      - name: Setup Nix
-        uses: ./.github/actions/setup-nix
-        with:
-          installer: ${{ inputs.nix_installer || 'quick' }}
-          system: x86_64-linux
-      - name: Setup cachix for binary cache
-        env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: |
-          nix develop -c sops exec-env vars/shared.yaml '
-            cachix use "$CACHIX_CACHE_NAME"
-            cachix use nix-community
-          '
-      - name: Install dependencies
-        run: nix develop -c just install
-      - name: Build documentation site
-        run: nix develop -c just build
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-          retention-days: 7
-          include-hidden-files: true
-
   deploy:
-    needs: [set-variables, nix, test, build]
+    needs: [set-variables, nix, test]
     if: |
       !cancelled() &&
       needs.set-variables.outputs.skip_ci != 'true' &&

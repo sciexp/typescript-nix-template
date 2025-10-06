@@ -46,18 +46,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Check for existing dist artifact
+        id: check-artifact
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: dist
+          path: dist/
+
       - name: Checkout
+        if: steps.check-artifact.outcome == 'failure'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
         with:
           ref: ${{ inputs.branch }}
 
       - name: Setup Nix
+        if: steps.check-artifact.outcome == 'failure'
         uses: ./.github/actions/setup-nix
         with:
           installer: quick
           system: x86_64-linux
 
       - name: Setup cachix for binary cache
+        if: steps.check-artifact.outcome == 'failure'
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: |
@@ -67,13 +78,15 @@ jobs:
           '
 
       - name: Setup tmate debug session
+        if: steps.check-artifact.outcome == 'failure' && inputs.debug_enabled == 'true'
         uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # ratchet:mxschmitt/action-tmate@v3
-        if: ${{ inputs.debug_enabled == 'true' }}
 
       - name: Install dependencies
+        if: steps.check-artifact.outcome == 'failure'
         run: nix develop -c just install
 
       - name: Build documentation site
+        if: steps.check-artifact.outcome == 'failure'
         run: nix develop -c just build
 
       - name: Upload build artifacts
