@@ -118,21 +118,11 @@ jobs:
 
       - name: Deploy to Cloudflare Workers
         id: deployment
-        run: |
-          if [ "${{ inputs.environment }}" = "preview" ]; then
-            sops exec-env vars/shared.yaml 'nix develop -c just cf-deploy-preview ${{ inputs.branch }}'
-          else
-            # For production, upload and immediately rollout to 100%
-            OUTPUT=$(sops exec-env vars/shared.yaml 'nix develop -c bunx wrangler versions upload --preview-alias b-${{ inputs.branch }}')
-            echo "$OUTPUT"
-            VERSION_ID=$(echo "$OUTPUT" | grep -oP 'Version ID: \K[a-f0-9-]+')
-            if [ -n "$VERSION_ID" ]; then
-              echo "Deploying version $VERSION_ID to production (100% traffic)"
-              sops exec-env vars/shared.yaml "nix develop -c just cf-rollout $VERSION_ID 100"
-            else
-              echo "Error: Could not extract version ID"
-              exit 1
-            fi
-          fi
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: |
+          if [ "${{ inputs.environment }}" = "preview" ]; then
+            nix develop -c sops exec-env vars/shared.yaml 'just cf-deploy-preview ${{ inputs.branch }}'
+          else
+            nix develop -c sops exec-env vars/shared.yaml 'just cf-deploy-production ${{ inputs.branch }}'
+          fi

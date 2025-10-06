@@ -256,6 +256,23 @@ cf-deploy-preview branch=`git branch --show-current`:
     echo "  just cf-rollout $VERSION_ID 100  # 100% traffic"
   fi
 
+# Deploy to production (upload version and rollout to 100%)
+[group('cloudflare')]
+cf-deploy-production branch=`git branch --show-current`:
+  #!/usr/bin/env bash
+  echo "Deploying production version for branch: {{branch}}"
+  OUTPUT=$(bunx wrangler versions upload)
+  echo "$OUTPUT"
+  VERSION_ID=$(echo "$OUTPUT" | grep -oP 'Version ID: \K[a-f0-9-]+')
+  if [ -n "$VERSION_ID" ]; then
+    echo ""
+    echo "Deploying version $VERSION_ID to production (100% traffic)"
+    bunx wrangler versions deploy ${VERSION_ID}@100 --yes
+  else
+    echo "Error: Could not extract version ID"
+    exit 1
+  fi
+
 # Rollout version to production with optional traffic percentage (default 100%)
 [group('cloudflare')]
 cf-rollout version_id percentage="100":
