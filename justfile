@@ -312,6 +312,11 @@ preview:
 install:
   bun install
 
+# Optimize favicon.svg with SVGO
+[group('docs')]
+optimize-favicon:
+  bunx svgo public/favicon.svg --multipass
+
 ## Nix
 
 # Enter the Nix development shell
