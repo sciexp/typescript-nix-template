@@ -21,15 +21,15 @@ test.describe("Homepage", () => {
     await expect(githubLink).toHaveAttribute("href", /.+/);
   });
 
-  test("navigates to example guide", async ({ page }) => {
+  test("navigates to getting started guide", async ({ page }) => {
     await page.goto("/");
 
-    // Find and click the Example Guide link
-    const guideLink = page.getByRole("link", { name: /example guide/i });
+    // Find and click the Getting started link
+    const guideLink = page.getByRole("link", { name: /getting started/i });
     await guideLink.click();
 
     // Verify navigation occurred
-    await expect(page).toHaveURL(/\/guides\/example/);
+    await expect(page).toHaveURL(/\/guides\/getting-started/);
   });
 
   test("is responsive on mobile", async ({ page }) => {
