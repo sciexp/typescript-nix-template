@@ -8,21 +8,24 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   integrations: [
     starlight({
-      title: "Starlight nix",
+      title: "typescript-nix-template",
       prerender: false,
       social: [
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/withastro/starlight",
+          href: "https://github.com/sciexp/typescript-nix-template",
         },
       ],
       sidebar: [
         {
           label: "Guides",
           items: [
-            // Each item here is one entry in the navigation menu.
-            { label: "Example Guide", slug: "guides/example" },
+            { label: "Getting started", slug: "guides/getting-started" },
+            { label: "Template usage", slug: "guides/template-usage" },
+            { label: "CI/CD setup", slug: "guides/ci-cd-setup" },
+            { label: "Testing", slug: "guides/testing" },
+            { label: "Secrets management", slug: "guides/secrets-management" },
           ],
         },
         {
