@@ -11,7 +11,7 @@ This document outlines the complete migration of the `starlight-nix-template` re
 - New: `typescript-nix-template`
 
 ### Packages
-- Package 1 (current codebase): `@sciexp/docs`
+- Package 1 (current codebase): `@typescript-nix-template/docs`
   - Location: `packages/docs/`
   - Description: Astro Starlight documentation site
 - Package 2 (future addition): `@sciexp/sqlrooms-hf-ducklake`
@@ -226,7 +226,7 @@ typescript-nix-template/
 
 ```json
 {
-  "name": "@sciexp/docs",
+  "name": "@typescript-nix-template/docs",
   "version": "0.0.0-development",
   "private": true,
   "description": "Starlight documentation site for sciexp projects",
@@ -572,7 +572,7 @@ Update all paths to reference `packages/docs/`:
   run: nix develop -c bun install
 
 - name: Build
-  run: nix develop -c bun run --filter '@sciexp/docs' build
+  run: nix develop -c bun run --filter '@typescript-nix-template/docs' build
 
 - name: Deploy
   env:
@@ -627,12 +627,12 @@ test-pkg package:
 # Run unit tests in docs
 [group('testing')]
 test-unit:
-  bun run --filter '@sciexp/docs' test:unit
+  bun run --filter '@typescript-nix-template/docs' test:unit
 
 # Run E2E tests in docs
 [group('testing')]
 test-e2e:
-  bun run --filter '@sciexp/docs' test:e2e
+  bun run --filter '@typescript-nix-template/docs' test:e2e
 
 ## Release
 
@@ -654,17 +654,17 @@ test-release-all:
 # Start development server
 [group('docs')]
 dev:
-  bun run --filter '@sciexp/docs' dev
+  bun run --filter '@typescript-nix-template/docs' dev
 
 # Build the documentation site
 [group('docs')]
 build:
-  bun run --filter '@sciexp/docs' build
+  bun run --filter '@typescript-nix-template/docs' build
 
 # Preview the built site
 [group('docs')]
 preview:
-  bun run --filter '@sciexp/docs' preview
+  bun run --filter '@typescript-nix-template/docs' preview
 
 # ... rest of justfile with updated paths ...
 ```
@@ -783,10 +783,10 @@ nix develop
 bun install
 
 # Run tests
-bun run --filter '@sciexp/docs' test
+bun run --filter '@typescript-nix-template/docs' test
 
 # Build
-bun run --filter '@sciexp/docs' build
+bun run --filter '@typescript-nix-template/docs' build
 
 # Exit dev shell
 exit
@@ -824,7 +824,7 @@ git add .
 git commit -m "refactor: migrate to bun monorepo with semantic-release
 
 - Rename repository to typescript-nix-template
-- Rename main package to @sciexp/docs
+- Rename main package to @typescript-nix-template/docs
 - Move package to packages/docs/
 - Add workspace configuration in root package.json
 - Add semantic-release configuration (disabled)
@@ -848,7 +848,7 @@ gh pr create --title "refactor: migrate to bun monorepo with semantic-release" \
 
 ## Changes
 - Repository renamed to typescript-nix-template
-- Package renamed to @sciexp/docs
+- Package renamed to @typescript-nix-template/docs
 - Workspace structure created with packages/ directory
 - Semantic-release configured (disabled initially)
 - GitHub Actions updated for monorepo
@@ -901,7 +901,7 @@ ls -la packages/docs/
 
 # Test again
 nix develop -c bun install
-nix develop -c bun run --filter '@sciexp/docs' test
+nix develop -c bun run --filter '@typescript-nix-template/docs' test
 ```
 
 ## Adding second package (future)
@@ -1171,7 +1171,7 @@ chore: update dependencies
 Before considering migration complete:
 
 - [ ] Repository renamed to typescript-nix-template
-- [ ] Package renamed to @sciexp/docs
+- [ ] Package renamed to @typescript-nix-template/docs
 - [ ] All files moved to packages/docs/
 - [ ] Root package.json configured as workspace
 - [ ] Package-specific package.json created
