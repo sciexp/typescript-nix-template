@@ -1,8 +1,8 @@
-# @sciexp/docs
+# @typescript-nix-template/docs
 
 [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
-Documentation site for sciexp projects, built with Astro and deployed to Cloudflare Workers.
+Documentation site built with Astro Starlight and deployed to Cloudflare Workers.
 
 ## Features
 
@@ -42,12 +42,12 @@ packages/docs/
 # Start dev server
 just dev
 # or
-bun run --filter '@sciexp/docs' dev
+bun run --filter '@typescript-nix-template/docs' dev
 
 # Build
 just build
 # or
-bun run --filter '@sciexp/docs' build
+bun run --filter '@typescript-nix-template/docs' build
 ```
 
 ### From package directory
