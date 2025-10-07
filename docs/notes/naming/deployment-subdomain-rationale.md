@@ -32,7 +32,7 @@ blog.scientistexperience.net      # org blog
 
 | Component | Value |
 |-----------|-------|
-| Package | `@sciexp/docs` |
+| Package | `@typescript-nix-template/docs` |
 | Worker | `ts-nix-docs` |
 | Route | `ts-nix.scientistexperience.net` |
 
@@ -86,7 +86,7 @@ docs.myproject.scientistexperience.net  # documentation
 Package structure:
 - `@sciexp/web` - main app (worker: `myproject-web`)
 - `@sciexp/api` - API backend (worker: `myproject-api`)
-- `@sciexp/docs` - documentation (worker: `myproject-docs`)
+- `@typescript-nix-template/docs` - documentation (worker: `myproject-docs`)
 
 ## Pattern for template users
 

@@ -2,7 +2,7 @@
 
 ## Executive summary
 
-**Recommendation**: Rename `@sciexp/starlight-docs` → `@sciexp/docs` with corresponding updates to directory structure, wrangler configuration, and documentation.
+**Recommendation**: Rename `@sciexp/starlight-docs` → `@typescript-nix-template/docs` with corresponding updates to directory structure, wrangler configuration, and documentation.
 
 **Rationale**: Framework-agnostic naming that serves both as a working sciexp deployment and a forkable template, following the pattern established by python-nix-template.
 
@@ -26,14 +26,14 @@ Following python-nix-template's approach, use names that work for both purposes.
 
 | Component | Current | New | Rationale |
 |-----------|---------|-----|-----------|
-| Package name | `@sciexp/starlight-docs` | `@sciexp/docs` | Generic, framework-agnostic, legitimate for both uses |
+| Package name | `@sciexp/starlight-docs` | `@typescript-nix-template/docs` | Generic, framework-agnostic, legitimate for both uses |
 | Directory | `packages/starlight-docs/` | `packages/docs/` | Matches package name |
 | Wrangler name | `starlight-nix-template` | `ts-nix-docs` | Indicates project and package |
 | Route | `starlight.scientistexperience.net` | `ts-nix.scientistexperience.net` | Project subdomain, preserves `docs.*` namespace |
 | Commit scope | `starlight-docs` | `docs` | Shorter, framework-independent |
 | Tags | `starlight-docs-v1.0.0` | `docs-v1.0.0` | Matches package name |
 
-### Why `@sciexp/docs` is optimal
+### Why `@typescript-nix-template/docs` is optimal
 
 1. **Template perspective**: Most projects need documentation - this is immediately useful
 2. **Sciexp perspective**: Legitimately serves as general sciexp documentation
@@ -63,7 +63,7 @@ www.scientistexperience.net       # main org site
 
 | Component | Value |
 |-----------|-------|
-| Package | `@sciexp/docs` |
+| Package | `@typescript-nix-template/docs` |
 | Worker | `ts-nix-docs` |
 | Route | `ts-nix.scientistexperience.net` |
 
@@ -86,7 +86,7 @@ www.scientistexperience.net       # main org site
 **Multi-component projects:**
 - `@sciexp/web` → worker: `myproject-web` → `myproject.scientistexperience.net`
 - `@sciexp/api` → worker: `myproject-api` → `api.myproject.scientistexperience.net`
-- `@sciexp/docs` → worker: `myproject-docs` → `docs.myproject.scientistexperience.net`
+- `@typescript-nix-template/docs` → worker: `myproject-docs` → `docs.myproject.scientistexperience.net`
 
 ### Pattern for template users
 
@@ -235,7 +235,7 @@ Created `nix/modules/template.nix` with:
    - `.github/workflows/deploy-docs.yaml`: paths
 
 5. Update justfile:
-   - All filter patterns: `@sciexp/starlight-docs` → `@sciexp/docs`
+   - All filter patterns: `@sciexp/starlight-docs` → `@typescript-nix-template/docs`
 
 6. Test locally:
    ```bash
@@ -252,7 +252,7 @@ Created `nix/modules/template.nix` with:
    git add .
    git commit -m "refactor(docs): rename to framework-agnostic package name
 
-   - Rename @sciexp/starlight-docs → @sciexp/docs
+   - Rename @sciexp/starlight-docs → @typescript-nix-template/docs
    - Update directory: packages/starlight-docs → packages/docs
    - Update wrangler: sciexp-docs @ docs.scientistexperience.net
    - Update all documentation and workflow references
@@ -340,7 +340,7 @@ When adding `@sciexp/sqlrooms-hf-ducklake`:
 All criteria met by this strategy:
 
 - ✅ **Framework independence**: No "Starlight" or "Astro" in names
-- ✅ **Template reusability**: `@sciexp/docs` works for template users
+- ✅ **Template reusability**: `@typescript-nix-template/docs` works for template users
 - ✅ **Clarity**: Purpose-based naming is immediately understandable
 - ✅ **Brevity**: Shortest meaningful names
 - ✅ **Omnix alignment**: Follows python-nix-template conventions
@@ -353,7 +353,7 @@ All criteria met by this strategy:
 
 ### 1. Package name?
 
-**Answer**: `@sciexp/docs`
+**Answer**: `@typescript-nix-template/docs`
 
 **Why not alternatives**:
 - `@sciexp/starlight-docs` - Framework-specific
@@ -408,7 +408,7 @@ Python-nix-template establishes the pattern:
 
 Our approach follows all five principles:
 
-1. ✅ Works as-is: `typescript-nix-template` with `@sciexp/docs` is deployed
+1. ✅ Works as-is: `typescript-nix-template` with `@typescript-nix-template/docs` is deployed
 2. ✅ Generic naming: No framework names (Starlight/Astro) in package name
 3. ✅ Purpose-based: "docs" describes purpose, not implementation
 4. ✅ Parameterized: Created `template.nix` with parameters
@@ -434,7 +434,7 @@ Our approach follows all five principles:
 
 ## Conclusion
 
-The recommendation to rename `@sciexp/starlight-docs` → `@sciexp/docs` with corresponding infrastructure updates achieves all objectives:
+The recommendation to rename `@sciexp/starlight-docs` → `@typescript-nix-template/docs` with corresponding infrastructure updates achieves all objectives:
 
 - Framework-independent naming that ages well
 - Works as both a template and a real deployment
