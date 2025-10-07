@@ -24,8 +24,8 @@ test.describe("Homepage", () => {
   test("navigates to getting started guide", async ({ page }) => {
     await page.goto("/");
 
-    // Find and click the Getting started link
-    const guideLink = page.getByRole("link", { name: /getting started/i });
+    // Find and click the Getting started link (using first to handle multiple matches)
+    const guideLink = page.getByRole("link", { name: /getting started/i }).first();
     await guideLink.click();
 
     // Verify navigation occurred
