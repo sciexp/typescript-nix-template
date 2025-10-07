@@ -8,7 +8,7 @@ This is a monorepo workspace containing TypeScript packages managed with Bun wor
 
 ## Packages
 
-- **[@sciexp/docs](./packages/docs)**: Astro Starlight documentation site [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+- **[@typescript-nix-template/docs](./packages/docs)**: Astro Starlight documentation site [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
 ## Project structure
 
@@ -90,12 +90,12 @@ just test-e2e
 
 ```bash
 # Run command in specific package
-bun run --filter '@sciexp/docs' dev
-bun run --filter '@sciexp/docs' build
-bun run --filter '@sciexp/docs' test
+bun run --filter '@typescript-nix-template/docs' dev
+bun run --filter '@typescript-nix-template/docs' build
+bun run --filter '@typescript-nix-template/docs' test
 
 # Run command in all packages
-bun run --filter '@sciexp/*' test
+bun run --filter '@typescript-nix-template/*' test
 ```
 
 ## Testing
