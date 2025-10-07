@@ -26,7 +26,7 @@ packages/docs/
 ├── public/                  # Static assets (favicon, etc.)
 ├── e2e/                     # End-to-end tests
 ├── tests/                   # Unit tests and fixtures
-├── astro.config.mjs         # Astro configuration
+├── astro.config.ts          # Astro configuration
 ├── wrangler.jsonc           # Cloudflare Workers configuration
 ├── tsconfig.json            # TypeScript configuration
 ├── vitest.config.ts         # Vitest configuration

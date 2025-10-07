@@ -77,7 +77,7 @@ typescript-nix-template/
 │       ├── e2e/                     # Moved from root
 │       ├── tests/                   # Moved from root
 │       ├── package.json             # Package-specific config + semantic-release
-│       ├── astro.config.mjs         # Moved from root
+│       ├── astro.config.ts          # Moved from root
 │       ├── wrangler.jsonc           # Moved from root
 │       ├── worker-configuration.d.ts # Moved from root
 │       ├── biome.json               # Moved from root (or shared at root)
@@ -706,7 +706,7 @@ mv e2e packages/docs/
 mv tests packages/docs/
 
 # Move configuration files
-mv astro.config.mjs packages/docs/
+mv astro.config.ts packages/docs/
 mv wrangler.jsonc packages/docs/
 mv worker-configuration.d.ts packages/docs/
 mv biome.json packages/docs/
