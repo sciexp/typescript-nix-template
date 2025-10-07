@@ -14,7 +14,7 @@
     {
       devShells = {
         default = pkgs.mkShell {
-          name = "starlight-nix-template-dev";
+          name = "typescript-nix-template-dev";
           inputsFrom = [ config.pre-commit.devShell ];
           packages = with pkgs; [
             # Core development tools

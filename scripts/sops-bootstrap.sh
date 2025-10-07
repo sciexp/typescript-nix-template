@@ -34,7 +34,7 @@ if [ "$METHOD" = "ssh" ]; then
   KEY_FILE=$(mktemp)
   trap "rm -f $KEY_FILE ${KEY_FILE}.pub" EXIT
 
-  ssh-keygen -t ed25519 -f "$KEY_FILE" -N "" -C "${ROLE}@starlight-nix-template"
+  ssh-keygen -t ed25519 -f "$KEY_FILE" -N "" -C "${ROLE}@typescript-nix-template"
   PUBLIC_KEY=$(ssh-to-age < "${KEY_FILE}.pub")
   PRIVATE_KEY=$(cat "$KEY_FILE")
   PRIVATE_AGE_KEY=$(ssh-to-age -private-key -i "$KEY_FILE")
@@ -171,7 +171,7 @@ if [ "$ROLE" = "dev" ]; then
   echo "   Option 2: Manual installation"
   echo "   mkdir -p ~/.config/sops/age"
   echo "   cat >> ~/.config/sops/age/keys.txt << KEYEOF"
-  echo "   # starlight-nix-template dev key"
+  echo "   # typescript-nix-template dev key"
   echo "   # public key: ${PUBLIC_KEY}"
   echo "   ${PRIVATE_KEY}"
   echo "   KEYEOF"

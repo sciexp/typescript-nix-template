@@ -323,7 +323,7 @@ If CI needs SSH access (e.g., to push commits as bot user):
 
 ```bash
 # Generate SSH key
-ssh-keygen -t ed25519 -f /tmp/ci-bot -N "" -C "ci-bot@starlight-nix-template"
+ssh-keygen -t ed25519 -f /tmp/ci-bot -N "" -C "ci-bot@typescript-nix-template"
 
 # Derive age key
 ssh-to-age < /tmp/ci-bot.pub
@@ -331,7 +331,7 @@ ssh-to-age < /tmp/ci-bot.pub
 
 # Add to .sops.yaml as ci key
 
-# Save SSH private key to Bitwarden as "starlight-nix-template CI SSH key"
+# Save SSH private key to Bitwarden as "typescript-nix-template CI SSH key"
 
 # For SOPS, derive age private key
 ssh-to-age -private-key -i /tmp/ci-bot
@@ -382,7 +382,7 @@ mkdir ~/.sops-shared
 cd ~/.sops-shared
 
 # Copy .sops.yaml and create shared.yaml
-cp ~/projects/starlight-nix-template/.sops.yaml .
+cp ~/projects/typescript-nix-template/.sops.yaml .
 sops shared.yaml
 
 # Upload to multiple repos
