@@ -15,8 +15,8 @@ test.describe("Homepage", () => {
   test("has accessible links", async ({ page }) => {
     await page.goto("/");
 
-    // Verify GitHub link exists and is accessible
-    const githubLink = page.getByRole("link", { name: /github/i });
+    // Verify GitHub link exists and is accessible (using first to handle multiple matches)
+    const githubLink = page.getByRole("link", { name: /github/i }).first();
     await expect(githubLink).toBeVisible();
     await expect(githubLink).toHaveAttribute("href", /.+/);
   });
