@@ -1,8 +1,8 @@
 {
-  "name": "@sciexp/docs",
+  "name": "@typescript-nix-template/docs",
   "version": "0.0.0-development",
   "private": true,
-  "description": "Documentation site for sciexp projects",
+  "description": "Documentation site built with Astro Starlight",
   "type": "module",
   "repository": {
     "type": "git",
