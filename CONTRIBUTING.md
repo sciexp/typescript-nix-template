@@ -102,7 +102,7 @@ just test-e2e
 just build
 
 # Or use bun directly
-bun run --filter '@sciexp/docs' build
+bun run --filter '@typescript-nix-template/docs' build
 ```
 
 ### Code quality
