@@ -253,12 +253,12 @@ gh-cancel run_id="":
 # Preview the site locally with Cloudflare Workers
 [group('cloudflare')]
 cf-preview:
-  bun run --filter '@sciexp/docs' preview
+  bun run --filter '@typescript-nix-template/docs' preview
 
 # Build and deploy the site to Cloudflare Workers
 [group('cloudflare')]
 cf-build-deploy: install
-  bun run --filter '@sciexp/docs' deploy
+  bun run --filter '@typescript-nix-template/docs' deploy
 
 # Deploy preview version with aliased preview URL for branch
 [group('cloudflare')]
@@ -321,17 +321,17 @@ cf-types:
 # Start development server
 [group('docs')]
 dev:
-  bun run --filter '@sciexp/docs' dev
+  bun run --filter '@typescript-nix-template/docs' dev
 
 # Build the documentation site
 [group('docs')]
 build:
-  bun run --filter '@sciexp/docs' build
+  bun run --filter '@typescript-nix-template/docs' build
 
 # Preview the built site
 [group('docs')]
 preview:
-  bun run --filter '@sciexp/docs' preview
+  bun run --filter '@typescript-nix-template/docs' preview
 
 # Optimize favicon.svg with SVGO
 [group('docs')]
@@ -552,37 +552,37 @@ sops-rotate role='dev':
 # Run all tests in all packages
 [group('testing')]
 test:
-  bun run --filter '@sciexp/*' test
+  bun run --filter '@typescript-nix-template/*' test
 
 # Run tests in specific package
 [group('testing')]
 test-pkg package:
-  bun run --filter '@sciexp/{{ package }}' test
+  bun run --filter '@typescript-nix-template/{{ package }}' test
 
 # Run unit tests in docs
 [group('testing')]
 test-unit:
-  bun run --filter '@sciexp/docs' test:unit
+  bun run --filter '@typescript-nix-template/docs' test:unit
 
 # Run E2E tests in docs
 [group('testing')]
 test-e2e:
-  bun run --filter '@sciexp/docs' test:e2e
+  bun run --filter '@typescript-nix-template/docs' test:e2e
 
 # Run vitest in watch mode
 [group('testing')]
 test-watch:
-  bun run --filter '@sciexp/docs' test:watch
+  bun run --filter '@typescript-nix-template/docs' test:watch
 
 # Run playwright in UI mode
 [group('testing')]
 test-ui:
-  bun run --filter '@sciexp/docs' test:ui
+  bun run --filter '@typescript-nix-template/docs' test:ui
 
 # Generate test coverage report
 [group('testing')]
 test-coverage:
-  bun run --filter '@sciexp/docs' test:coverage
+  bun run --filter '@typescript-nix-template/docs' test:coverage
 
 # Install playwright browsers (only needed outside Nix environment)
 # The Nix devshell provides browsers via playwright-driver.browsers
