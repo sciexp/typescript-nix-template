@@ -1,18 +1,106 @@
 name: Package Test
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       package-name:
+        description: "Name of the package to test"
         required: true
         type: string
       package-path:
+        description: "Path to the package directory"
         required: true
         type: string
+      debug-enabled:
+        description: "Run with tmate.io debugging enabled"
+        required: false
+        type: boolean
+        default: false
+      nix-installer:
+        description: "Nix installer strategy (quick or full)"
+        required: false
+        type: string
+        default: "quick"
+
+  workflow_call:
+    inputs:
+      package-name:
+        description: "Name of the package to test"
+        required: true
+        type: string
+      package-path:
+        description: "Path to the package directory"
+        required: true
+        type: string
+      debug-enabled:
+        description: "Run with tmate.io debugging enabled"
+        required: false
+        type: string
+        default: "false"
+      nix-installer:
+        description: "Nix installer strategy (quick or full)"
+        required: false
+        type: string
+        default: "quick"
+    secrets:
+      SOPS_AGE_KEY:
+        required: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  stub:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Workflow stub
-        run: echo "Stub - full implementation in PR"
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        with:
+          installer: ${{ inputs.nix-installer }}
+          system: x86_64-linux
+          setup-cachix: true
+
+      - name: Setup tmate debug session
+        uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # ratchet:mxschmitt/action-tmate@v3
+        if: ${{ inputs.debug-enabled == 'true' }}
+
+      - name: Install dependencies
+        run: nix develop -c just install
+
+      - name: Run unit tests with coverage
+        run: nix develop -c just test-coverage
+
+      - name: Build for E2E tests
+        run: nix develop -c just build
+
+      - name: Run E2E tests
+        run: nix develop -c just test-e2e
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ inputs.package-name }}
+          path: ${{ inputs.package-path }}/dist/
+          retention-days: 7
+          include-hidden-files: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ inputs.package-name }}
+          path: ${{ inputs.package-path }}/playwright-report/
+          retention-days: 7
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ inputs.package-name }}
+          path: ${{ inputs.package-path }}/coverage/
+          retention-days: 7

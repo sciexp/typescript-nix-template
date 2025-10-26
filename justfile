@@ -525,6 +525,19 @@ preview-version target="main" package="":
     ./scripts/preview-version.sh "{{target}}"
   fi
 
+# Release specific package with semantic-release
+[group('release')]
+release-package package dry_run="false":
+  #!/usr/bin/env bash
+  set -euo pipefail
+  cd packages/{{ package }}
+  if [ "{{ dry_run }}" = "true" ]; then
+    bun run test-release
+  else
+    echo "This will create a real release. Use dry_run=true for testing."
+    bun run semantic-release
+  fi
+
 ## Secrets
 
 # Scan repository for secrets
@@ -743,6 +756,11 @@ test-ui:
 [group('testing')]
 test-coverage:
   bun run --filter '@typescript-nix-template/docs' test:coverage
+
+# Run all tests for specific package (CI workflow)
+[group('testing')]
+test-package package:
+  cd packages/{{ package }} && bun run test:unit && bun run test:coverage && bun run test:e2e
 
 # Install playwright browsers (only needed outside Nix environment)
 # The Nix devshell provides browsers via playwright-driver.browsers
