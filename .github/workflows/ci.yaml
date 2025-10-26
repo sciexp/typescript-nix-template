@@ -47,29 +47,33 @@ permissions:
   id-token: write
 
 jobs:
-  scan:
-    name: gitguardian
+  secrets-scan:
+    name: gitleaks
     runs-on: ubuntu-latest
     if: |
       github.event_name != 'workflow_dispatch' ||
       inputs.job == '' ||
-      inputs.job == 'scan'
+      inputs.job == 'secrets-scan'
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: GitGuardian scan
-        uses: GitGuardian/ggshield-action@455483042671cc73b40d0e753baddffef7309a1f # ratchet:GitGuardian/ggshield-action@v1.37.0
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
         env:
-          GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
-          GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
-          GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        with:
+          installer: ${{ inputs.nix_installer || 'quick' }}
+          system: x86_64-linux
+          setup-cachix: true
+
+      - name: Scan for secrets with gitleaks
+        run: nix develop -c just scan-secrets
 
   set-variables:
-    needs: scan
+    needs: secrets-scan
     runs-on: ubuntu-latest
     if: |
       !cancelled() &&
