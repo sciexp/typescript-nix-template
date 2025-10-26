@@ -16,6 +16,13 @@
         hooks = {
           nixfmt-rfc-style.enable = true;
           biome.enable = true;
+          gitleaks = {
+            enable = true;
+            name = "gitleaks";
+            entry = "${pkgs.gitleaks}/bin/gitleaks protect --staged --verbose --redact";
+            language = "system";
+            pass_filenames = false;
+          };
         };
       };
     };

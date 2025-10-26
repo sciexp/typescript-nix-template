@@ -27,6 +27,7 @@
             age
             sops
             ssh-to-age
+            gitleaks
 
             # CI/CD tools
             gh
