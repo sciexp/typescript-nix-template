@@ -514,6 +514,17 @@ test-release-all:
     cd "$pkg" && bun run test-release && cd ../..; \
   done
 
+# Preview semantic-release version after merging current branch to target
+[group('release')]
+preview-version target="main" package="":
+  #!/usr/bin/env bash
+  set -euo pipefail
+  if [ -n "{{package}}" ]; then
+    ./scripts/preview-version.sh "{{target}}" "{{package}}"
+  else
+    ./scripts/preview-version.sh "{{target}}"
+  fi
+
 ## Secrets
 
 # Scan repository for secrets
