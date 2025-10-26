@@ -1,0 +1,17 @@
+# .gitleaksignore - Fingerprints of false positives safe to ignore
+# Format: <commit>:<file>:<rule>:<line>
+# These are age public keys used in documentation and scripts (safe to commit)
+
+# Age public key in CI/CD setup documentation (commit 3e1d314b)
+3e1d314b2feafeba8c46da73257557caca7bd1dc:packages/docs/src/content/docs/guides/ci-cd-setup.md:generic-api-key:54
+
+# Age public key placeholders in sops-bootstrap.sh (commit 5c662602)
+5c662602e6d280c86c2e12321aa91b6c7db2d3aa:scripts/sops-bootstrap.sh:generic-api-key:21
+5c662602e6d280c86c2e12321aa91b6c7db2d3aa:scripts/sops-bootstrap.sh:generic-api-key:22
+
+# Age public key placeholders in justfile sops-add-key recipe (commit e8c56a3a)
+e8c56a3ace8525d2c0960563f172c3c300eb044c:justfile:generic-api-key:424
+e8c56a3ace8525d2c0960563f172c3c300eb044c:justfile:generic-api-key:425
+
+# Age public key in old CI_SETUP.md documentation (commit 7b972f52, file later moved)
+7b972f52937be8b6ab36c804e6e8316cd2e7f3a3:CI_SETUP.md:generic-api-key:51
