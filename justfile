@@ -85,7 +85,6 @@ ghsecrets repo="":
   echo
   sops exec-env vars/shared.yaml '\
   gh secret set CACHIX_AUTH_TOKEN --repo='"$REPO"' --body="$CACHIX_AUTH_TOKEN" && \
-  gh secret set GITGUARDIAN_API_KEY --repo='"$REPO"' --body="$GITGUARDIAN_API_KEY" && \
   gh secret set CLOUDFLARE_ACCOUNT_ID --repo='"$REPO"' --body="$CLOUDFLARE_ACCOUNT_ID" && \
   gh secret set CLOUDFLARE_API_TOKEN --repo='"$REPO"' --body="$CLOUDFLARE_API_TOKEN"'
   echo
@@ -420,7 +419,7 @@ run-with-secrets +command:
 [group('secrets')]
 check-secrets:
   @printf "Check sops environment for secrets\n\n"
-  @sops exec-env vars/shared.yaml 'env | grep -E "GITHUB|CACHIX|CLOUDFLARE|GITGUARDIAN" | sed "s/=.*$/=***REDACTED***/"'
+  @sops exec-env vars/shared.yaml 'env | grep -E "GITHUB|CACHIX|CLOUDFLARE" | sed "s/=.*$/=***REDACTED***/"'
 
 # Show specific secret value from shared secrets
 [group('secrets')]
