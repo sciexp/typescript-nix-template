@@ -377,6 +377,16 @@ test-release-all:
 
 ## Secrets
 
+# Scan repository for secrets
+[group('secrets')]
+scan-secrets:
+  gitleaks detect --verbose --redact
+
+# Scan staged changes for secrets (pre-commit)
+[group('secrets')]
+scan-staged:
+  gitleaks protect --staged --verbose --redact
+
 # Show existing secrets using sops
 [group('secrets')]
 show-secrets:
