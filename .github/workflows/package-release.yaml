@@ -52,9 +52,6 @@ on:
         required: false
         type: string
         default: ""
-    secrets:
-      GITHUB_TOKEN:
-        required: true
     outputs:
       version:
         description: "Released version"
