@@ -109,6 +109,10 @@ jobs:
             if ${{ contains(github.event.pull_request.labels.*.name, 'actions-debug') }}; then
               DEBUG="true"
             fi
+            if ${{ contains(github.event.pull_request.labels.*.name, 'docs-preview') }}; then
+              DEPLOY_ENABLED="true"
+              DEPLOY_ENVIRONMENT="preview"
+            fi
             CHECKOUT_REF="${{ github.event.pull_request.head.ref }}"
             CHECKOUT_REV="${{ github.event.pull_request.head.sha }}"
           else
