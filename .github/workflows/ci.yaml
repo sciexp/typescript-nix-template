@@ -87,6 +87,7 @@ jobs:
       deploy_environment: ${{ steps.set-variables.outputs.deploy_environment }}
       checkout_ref: ${{ steps.set-variables.outputs.checkout_ref }}
       checkout_rev: ${{ steps.set-variables.outputs.checkout_rev }}
+      packages: ${{ steps.discover-packages.outputs.packages }}
 
     steps:
       - name: Set action variables
@@ -140,6 +141,23 @@ jobs:
           echo "CHECKOUT_REF=$CHECKOUT_REF" >> $GITHUB_OUTPUT
           echo "CHECKOUT_REV=$CHECKOUT_REV" >> $GITHUB_OUTPUT
 
+      - name: Checkout for package discovery
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+        with:
+          sparse-checkout: |
+            packages
+            justfile
+          sparse-checkout-cone-mode: false
+
+      - name: Discover packages
+        id: discover-packages
+        run: |
+          # Install just for package discovery
+          curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+          PACKAGES=$(just list-packages-json)
+          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+          echo "Discovered packages: $PACKAGES"
+
   nix:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -189,57 +207,73 @@ jobs:
       (github.event_name != 'workflow_dispatch' ||
        inputs.job == '' ||
        inputs.job == 'test')
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        package:
-          - name: docs
-            path: packages/docs
+        package: ${{ fromJson(needs.set-variables.outputs.packages) }}
     concurrency:
       group: test-${{ matrix.package.name }}-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
       cancel-in-progress: true
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
-      - name: Setup Nix
-        uses: ./.github/actions/setup-nix
-        env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        with:
-          installer: ${{ inputs.nix_installer || 'quick' }}
-          system: x86_64-linux
-          setup-cachix: true
-      - name: Install dependencies
-        run: nix develop -c just install
-      - name: Run unit tests with coverage
-        run: nix develop -c just test-coverage
-      - name: Build for E2E tests
-        run: nix develop -c just build
-      - name: Run E2E tests
-        run: nix develop -c just test-e2e
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-${{ matrix.package.name }}
-          path: ${{ matrix.package.path }}/dist/
-          retention-days: 7
-          include-hidden-files: true
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-${{ matrix.package.name }}
-          path: ${{ matrix.package.path }}/playwright-report/
-          retention-days: 7
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.package.name }}
-          path: ${{ matrix.package.path }}/coverage/
-          retention-days: 7
+    uses: ./.github/workflows/package-test.yaml
+    with:
+      package-name: ${{ matrix.package.name }}
+      package-path: ${{ matrix.package.path }}
+      debug-enabled: ${{ needs.set-variables.outputs.debug }}
+      nix-installer: ${{ inputs.nix_installer || 'quick' }}
+    secrets:
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+
+  test-release-packages:
+    needs: [set-variables, test]
+    if: ${{ github.event_name == 'pull_request' && needs.set-variables.outputs.skip_ci != 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.set-variables.outputs.packages) }}
+    concurrency:
+      group: test-release-${{ matrix.package.name }}-${{ github.workflow }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    permissions:
+      contents: write
+      id-token: write
+    uses: ./.github/workflows/package-release.yaml
+    with:
+      package-path: ${{ matrix.package.path }}
+      package-name: ${{ matrix.package.name }}
+      release-dry-run: true
+      debug-enabled: ${{ needs.set-variables.outputs.debug == 'true' }}
+      checkout-ref: ${{ needs.set-variables.outputs.checkout_ref }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-packages:
+    needs: [set-variables, test, nix]
+    if: |
+      github.repository_owner == 'sciexp' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta') &&
+      needs.set-variables.outputs.skip_ci != 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJson(needs.set-variables.outputs.packages) }}
+    concurrency:
+      group: release-${{ matrix.package.name }}-${{ github.workflow }}-${{ github.ref_name }}
+      cancel-in-progress: true
+    permissions:
+      contents: write
+      id-token: write
+    uses: ./.github/workflows/package-release.yaml
+    with:
+      package-path: ${{ matrix.package.path }}
+      package-name: ${{ matrix.package.name }}
+      release-dry-run: false
+      debug-enabled: ${{ needs.set-variables.outputs.debug == 'true' }}
+      checkout-ref: ${{ needs.set-variables.outputs.checkout_ref }}
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    needs: [set-variables, nix, test]
+    needs: [set-variables, nix, test, release-packages]
     if: |
       !cancelled() &&
       needs.set-variables.outputs.skip_ci != 'true' &&
