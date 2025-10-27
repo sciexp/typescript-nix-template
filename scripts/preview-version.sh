@@ -23,6 +23,7 @@ WORKTREE_DIR=$(mktemp -d "${TMPDIR:-/tmp}/semantic-release-preview.XXXXXX")
 
 # Save original target branch HEAD for restoration
 ORIGINAL_TARGET_HEAD=""
+ORIGINAL_REMOTE_HEAD=""
 
 # Colors for output
 RED='\033[0;31m'
@@ -39,6 +40,11 @@ cleanup() {
   if [ -n "$ORIGINAL_TARGET_HEAD" ]; then
     echo -e "\n${BLUE}restoring ${TARGET_BRANCH} to original state...${NC}"
     git update-ref "refs/heads/$TARGET_BRANCH" "$ORIGINAL_TARGET_HEAD" 2>/dev/null || true
+  fi
+
+  # Always restore remote-tracking branch to original state if we modified it
+  if [ -n "$ORIGINAL_REMOTE_HEAD" ]; then
+    git update-ref "refs/remotes/origin/$TARGET_BRANCH" "$ORIGINAL_REMOTE_HEAD" 2>/dev/null || true
   fi
 
   # Clean up worktree
@@ -61,7 +67,7 @@ if [ "$CURRENT_BRANCH" == "$TARGET_BRANCH" ]; then
   if [ -n "$PACKAGE_PATH" ]; then
     cd "$REPO_ROOT/$PACKAGE_PATH"
   fi
-  exec bun run test-release
+  exec nix develop -c bun run test-release
 fi
 
 # Display what we're doing
@@ -85,6 +91,9 @@ fi
 
 # Save original target branch HEAD before any modifications
 ORIGINAL_TARGET_HEAD=$(git rev-parse "$TARGET_BRANCH")
+
+# Save original remote-tracking branch HEAD before any modifications
+ORIGINAL_REMOTE_HEAD=$(git rev-parse "origin/$TARGET_BRANCH" 2>/dev/null || echo "")
 
 # Create merge tree to test if merge is possible
 echo -e "${BLUE}simulating merge of ${CURRENT_BRANCH} → ${TARGET_BRANCH}...${NC}"
@@ -125,6 +134,9 @@ fi
 echo -e "${BLUE}temporarily updating ${TARGET_BRANCH} ref for analysis...${NC}"
 git update-ref "refs/heads/$TARGET_BRANCH" "$TEMP_COMMIT"
 
+# Also update remote-tracking branch to match (so semantic-release sees them as synchronized)
+git update-ref "refs/remotes/origin/$TARGET_BRANCH" "$TEMP_COMMIT"
+
 # Create worktree at target branch (now pointing to merge commit)
 echo -e "${BLUE}creating temporary worktree at ${TARGET_BRANCH}...${NC}"
 git worktree add --quiet "$WORKTREE_DIR" "$TARGET_BRANCH"
@@ -134,7 +146,7 @@ cd "$WORKTREE_DIR"
 
 # Install dependencies in worktree (bun uses global cache, so this is fast)
 echo -e "${BLUE}installing dependencies in worktree...${NC}"
-bun install --silent &>/dev/null
+nix develop -c bun install --silent
 
 # Navigate to package if specified
 if [ -n "$PACKAGE_PATH" ]; then
@@ -155,10 +167,10 @@ PLUGINS="@semantic-release/commit-analyzer,@semantic-release/release-notes-gener
 
 if [ -n "$PACKAGE_PATH" ]; then
   # For monorepo packages, check if package.json has specific plugins configured
-  OUTPUT=$(bun run semantic-release --dry-run --no-ci --branches "$TARGET_BRANCH" --plugins "$PLUGINS" 2>&1 || true)
+  OUTPUT=$(GITHUB_REF="refs/heads/$TARGET_BRANCH" nix develop -c bun run semantic-release --dry-run --no-ci --branches "$TARGET_BRANCH" --plugins "$PLUGINS" 2>&1 || true)
 else
   # For root package
-  OUTPUT=$(bun run semantic-release --dry-run --no-ci --branches "$TARGET_BRANCH" --plugins "$PLUGINS" 2>&1 || true)
+  OUTPUT=$(GITHUB_REF="refs/heads/$TARGET_BRANCH" nix develop -c bun run semantic-release --dry-run --no-ci --branches "$TARGET_BRANCH" --plugins "$PLUGINS" 2>&1 || true)
 fi
 
 # Display semantic-release summary (filter out verbose plugin repetition)
