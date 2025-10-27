@@ -219,25 +219,83 @@ jobs:
     secrets:
       SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
 
-  test-release-packages:
-    needs: [set-variables, test]
-    if: ${{ github.event_name == 'pull_request' && needs.set-variables.outputs.skip_ci != 'true' }}
+  # job 3: preview-release-version
+  # Preview semantic-release version for each package (PR only, fast feedback)
+  preview-release-version:
+    needs: [set-variables]
+    if: |
+      !cancelled() &&
+      github.event_name == 'pull_request'
     strategy:
       fail-fast: false
       matrix:
         package: ${{ fromJson(needs.set-variables.outputs.packages) }}
+    runs-on: ubuntu-latest
+    # semantic-release verifyAuth requires push permission even in dry-run mode
+    # https://github.com/semantic-release/semantic-release/blob/v25.0.1/index.js#L87-L98
     permissions:
       contents: write
-      id-token: write
-    uses: ./.github/workflows/package-release.yaml
-    with:
-      package-path: ${{ matrix.package.path }}
-      package-name: ${{ matrix.package.name }}
-      release-dry-run: true
-      debug-enabled: ${{ needs.set-variables.outputs.debug == 'true' }}
-      checkout-ref: ${{ needs.set-variables.outputs.checkout_ref }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}  # Checkout actual PR branch, not merge commit
+          fetch-depth: 0  # Full history needed for semantic-release analysis
+          fetch-tags: true  # Explicitly fetch all tags for version detection
 
-  release-packages:
+      - name: Fetch target branch for preview
+        run: |
+          git fetch origin
+          git branch -f main origin/main
+
+      - name: Configure git identity for temporary commits
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        with:
+          installer: quick
+          system: x86_64-linux
+          setup-cachix: true
+
+      - name: Install dependencies
+        run: nix develop -c bun install
+
+      - name: Setup tmate debug session
+        if: needs.set-variables.outputs.debug == 'true'
+        uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # ratchet:mxschmitt/action-tmate@v3
+
+      - name: Preview version for ${{ matrix.package.name }}
+        run: |
+          echo "::group::Preview semantic-release version"
+          nix develop -c just preview-version main ${{ matrix.package.path }}
+          echo "::endgroup::"
+
+  # job 4: preview-docs-deploy
+  # Deploy docs to preview environment (PR only, fast feedback)
+  preview-docs-deploy:
+    needs: [set-variables]
+    if: |
+      !cancelled() &&
+      github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      deployments: write
+    uses: ./.github/workflows/deploy-docs.yaml
+    with:
+      branch: ${{ github.head_ref }}
+      environment: preview
+      debug_enabled: ${{ needs.set-variables.outputs.debug }}
+    secrets: inherit
+
+  # job 5: production-release-packages
+  # Release packages to production on main/beta branches
+  # REQUIRES test+nix success/skipped (quality gate)
+  production-release-packages:
     needs: [set-variables, test, nix]
     if: |
       github.repository_owner == 'sciexp' &&
@@ -258,9 +316,14 @@ jobs:
       release-dry-run: false
       debug-enabled: ${{ needs.set-variables.outputs.debug == 'true' }}
       checkout-ref: ${{ needs.set-variables.outputs.checkout_ref }}
+    secrets:
+      SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
 
-  deploy:
-    needs: [set-variables, nix, test, release-packages]
+  # job 6: production-docs-deploy
+  # Documentation deployment to production (conditional)
+  # Depends on production-release-packages to ensure packages released first
+  production-docs-deploy:
+    needs: [set-variables, test, production-release-packages]
     if: |
       !cancelled() &&
       needs.set-variables.outputs.skip_ci != 'true' &&
