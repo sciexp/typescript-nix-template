@@ -328,6 +328,8 @@ jobs:
     if: |
       !cancelled() &&
       needs.set-variables.outputs.skip_ci != 'true' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta') &&
       needs.set-variables.outputs.deploy_enabled == 'true' &&
       (github.event_name != 'workflow_dispatch' ||
        inputs.job == '' ||
