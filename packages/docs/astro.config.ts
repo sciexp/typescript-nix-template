@@ -9,7 +9,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: "typescript-nix-template",
-      prerender: false,
+      prerender: true,
       social: [
         {
           icon: "github",
