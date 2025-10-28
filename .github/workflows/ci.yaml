@@ -47,13 +47,33 @@ permissions:
   id-token: write
 
 jobs:
+  # job 0: skip-check
+  # prevents duplicate workflow runs on same commit hash
+  skip-check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # ratchet:fkirc/skip-duplicate-actions@v5
+        with:
+          skip_after_successful_duplicate: 'true'
+          do_not_skip: '["schedule"]'
+          concurrent_skipping: 'never'
+          cancel_others: 'false'
+
+  # job 1: secrets-scan
+  # scans repository for hardcoded secrets using gitleaks
+  # ALWAYS runs (ignores skip-check) - security critical
   secrets-scan:
     name: gitleaks
+    needs: skip-check
     runs-on: ubuntu-latest
     if: |
-      github.event_name != 'workflow_dispatch' ||
-      inputs.job == '' ||
-      inputs.job == 'secrets-scan'
+      !cancelled() &&
+      (github.event_name != 'workflow_dispatch' ||
+       inputs.job == '' ||
+       inputs.job == 'secrets-scan')
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
@@ -72,8 +92,11 @@ jobs:
       - name: Scan for secrets with gitleaks
         run: nix develop -c just scan-secrets
 
+  # job 2: set-variables
+  # determines deployment settings and variables based on event type
+  # ALWAYS runs (ignores skip-check) - needed for job routing
   set-variables:
-    needs: secrets-scan
+    needs: [skip-check, secrets-scan]
     runs-on: ubuntu-latest
     if: |
       !cancelled() &&
@@ -163,9 +186,10 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-    needs: set-variables
+    needs: [skip-check, set-variables]
     if: |
       !cancelled() &&
+      needs.skip-check.outputs.should_skip != 'true' &&
       needs.set-variables.outputs.skip_ci != 'true' &&
       (github.event_name != 'workflow_dispatch' ||
        inputs.job == '' ||
@@ -201,9 +225,10 @@ jobs:
           '
 
   test:
-    needs: [set-variables]
+    needs: [skip-check, set-variables]
     if: |
       !cancelled() &&
+      needs.skip-check.outputs.should_skip != 'true' &&
       needs.set-variables.outputs.skip_ci != 'true' &&
       (github.event_name != 'workflow_dispatch' ||
        inputs.job == '' ||
@@ -295,7 +320,7 @@ jobs:
 
   # job 5: production-release-packages
   # Release packages to production on main/beta branches
-  # REQUIRES test+nix success/skipped (quality gate)
+  # IGNORES skip-check but REQUIRES test+nix success/skipped (safe for fast-forward merge)
   production-release-packages:
     needs: [set-variables, test, nix]
     if: |
@@ -322,7 +347,7 @@ jobs:
 
   # job 6: production-docs-deploy
   # Documentation deployment to production (conditional)
-  # Depends on production-release-packages to ensure packages released first
+  # IGNORES skip-check - depends on production-release-packages to ensure packages released first
   production-docs-deploy:
     needs: [set-variables, test, production-release-packages]
     if: |
