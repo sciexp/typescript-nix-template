@@ -73,13 +73,13 @@ jobs:
         run: nix develop -c just install
 
       - name: Run unit tests with coverage
-        run: nix develop -c just test-coverage
+        run: nix develop -c just docs-test-coverage
 
       - name: Build for E2E tests
-        run: nix develop -c just build
+        run: nix develop -c just docs-build
 
       - name: Run E2E tests
-        run: nix develop -c just test-e2e
+        run: nix develop -c just docs-test-e2e
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
