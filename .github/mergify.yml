@@ -8,19 +8,38 @@ pull_request_rules:
       assign:
         add_users:
           - "{{ author }}"
-  - name: automatic merge when not WIP, CI passes, and at least 1 approving review
+  - name: automatic merge to queue
     conditions:
       - "#approved-reviews-by>=1"
-      - check-success=scan
-      - check-success=nix (ubuntu-latest)
-      - check-success=test (docs)
-      - base=main
       - label!=work-in-progress
+      - -draft
+      - -conflict
+      - check-success=skip-check
+      - check-success=gitleaks
+      - check-success=set-variables
+      - or:
+        - check-success=nix
+        - check-skipped=nix
+      - or:
+        - check-success=test (docs)
+        - check-skipped=test (docs)
+      - check-success=PR Check Fast-forward
     actions:
       queue:
         name: default
+
 queue_rules:
   - name: default
     merge_method: fast-forward
     update_method: rebase
     update_bot_account: cameronraysmith
+    batch_size: 1
+    checks_timeout: 3600
+    queue_conditions:
+      - check-success=skip-check
+    merge_conditions:
+      - check-success=skip-check
+    commit_message_template: |
+      {{ title }} (#{{ number }})
+
+      {{ body }}
