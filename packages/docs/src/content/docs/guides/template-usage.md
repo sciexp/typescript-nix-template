@@ -232,7 +232,7 @@ matrix:
 
 Update filter patterns:
 
-```justfile
+```just
 # Before
 bun run --filter '@typescript-nix-template/docs' dev
 
