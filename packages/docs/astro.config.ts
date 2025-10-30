@@ -8,11 +8,6 @@ import justGrammar from "./src/grammars/just.tmLanguage.json";
 
 // https://astro.build/config
 export default defineConfig({
-  markdown: {
-    shikiConfig: {
-      langs: [justGrammar],
-    },
-  },
   integrations: [
     starlight({
       title: "typescript-nix-template",
@@ -24,6 +19,11 @@ export default defineConfig({
             }),
           ]
         : [],
+      expressiveCode: {
+        shiki: {
+          langs: [justGrammar],
+        },
+      },
       social: [
         {
           icon: "github",
