@@ -460,27 +460,62 @@ cf-types:
 
 # Start development server
 [group('docs')]
-dev:
-  bun run --filter '@typescript-nix-template/docs' dev
+docs-dev:
+  cd packages/docs && bun run dev
 
 # Build the documentation site
 [group('docs')]
-build:
-  bun run --filter '@typescript-nix-template/docs' build
-
-# Validate documentation links
-[group('docs')]
-linkcheck:
-  cd packages/docs && bun run linkcheck
+docs-build:
+  cd packages/docs && bun run build
 
 # Preview the built site
 [group('docs')]
-preview:
-  bun run --filter '@typescript-nix-template/docs' preview
+docs-preview:
+  cd packages/docs && bun run preview
+
+# Format documentation code
+[group('docs')]
+docs-format:
+  cd packages/docs && bun run format
+
+# Lint documentation code
+[group('docs')]
+docs-lint:
+  cd packages/docs && bun run lint
+
+# Check and fix documentation code
+[group('docs')]
+docs-check:
+  cd packages/docs && bun run check:fix
+
+# Validate documentation links
+[group('docs')]
+docs-linkcheck:
+  cd packages/docs && bun run linkcheck
+
+# Run all documentation tests
+[group('docs')]
+docs-test:
+  cd packages/docs && bun run test
+
+# Run documentation unit tests
+[group('docs')]
+docs-test-unit:
+  cd packages/docs && bun run test:unit
+
+# Run documentation E2E tests
+[group('docs')]
+docs-test-e2e:
+  cd packages/docs && bun run test:e2e
+
+# Generate documentation test coverage report
+[group('docs')]
+docs-test-coverage:
+  cd packages/docs && bun run test:coverage
 
 # Optimize favicon.svg with SVGO
 [group('docs')]
-optimize-favicon:
+docs-optimize-favicon:
   bunx svgo packages/docs/public/favicon.svg --multipass
 
 ## Nix
