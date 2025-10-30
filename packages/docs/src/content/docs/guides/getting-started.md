@@ -74,7 +74,7 @@ bun install
 just dev
 ```
 
-Visit http://localhost:4321 to see your site.
+Visit `http://localhost:4321` in your browser to see your site.
 
 ## Understanding the structure
 
