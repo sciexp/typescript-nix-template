@@ -1,6 +1,7 @@
 import cloudflare from "@astrojs/cloudflare";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
+import starlightLinksValidator from "starlight-links-validator";
 // ROLLDOWN INTEGRATION (DISABLED) - Uncomment when re-enabling (see ROLLDOWN.md)
 // import * as vite from "vite";
 
@@ -10,6 +11,13 @@ export default defineConfig({
     starlight({
       title: "typescript-nix-template",
       prerender: true,
+      plugins: process.env.CHECK_LINKS
+        ? [
+            starlightLinksValidator({
+              errorOnRelativeLinks: false,
+            }),
+          ]
+        : [],
       social: [
         {
           icon: "github",
