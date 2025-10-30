@@ -74,7 +74,7 @@ jobs:
         run: nix develop -c just install
 
       - name: Validate documentation links
-        run: nix develop -c just linkcheck
+        run: nix develop -c just docs-linkcheck
 
       - name: Deploy to Cloudflare Workers
         id: deployment
