@@ -467,6 +467,11 @@ dev:
 build:
   bun run --filter '@typescript-nix-template/docs' build
 
+# Validate documentation links
+[group('docs')]
+linkcheck:
+  cd packages/docs && bun run linkcheck
+
 # Preview the built site
 [group('docs')]
 preview:
