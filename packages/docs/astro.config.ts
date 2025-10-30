@@ -2,11 +2,17 @@ import cloudflare from "@astrojs/cloudflare";
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 import starlightLinksValidator from "starlight-links-validator";
+import justGrammar from "./src/grammars/just.tmLanguage.json";
 // ROLLDOWN INTEGRATION (DISABLED) - Uncomment when re-enabling (see ROLLDOWN.md)
 // import * as vite from "vite";
 
 // https://astro.build/config
 export default defineConfig({
+  markdown: {
+    shikiConfig: {
+      langs: [justGrammar],
+    },
+  },
   integrations: [
     starlight({
       title: "typescript-nix-template",
