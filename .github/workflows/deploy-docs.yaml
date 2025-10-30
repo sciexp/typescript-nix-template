@@ -64,7 +64,6 @@ jobs:
         with:
           installer: quick
           system: x86_64-linux
-          enable-cachix: true
 
       - name: Setup tmate debug session
         if: inputs.debug_enabled == 'true'
