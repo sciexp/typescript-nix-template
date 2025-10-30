@@ -19,6 +19,43 @@ default:
 install:
   bun install
 
+# Update dependencies to latest compatible versions (respects ^, ~)
+[group('workspace')]
+update:
+  bun update
+
+# Upgrade dependencies to latest versions (ignoring semver constraints)
+[group('workspace')]
+upgrade:
+  bun upgrade
+
+# Show outdated dependencies
+[group('workspace')]
+outdated:
+  bun outdated
+
+# Check if @playwright/test matches playwright-web-flake version
+[group('workspace')]
+check-playwright:
+  @./scripts/check-playwright-sync.sh
+
+# Update @playwright/test to match playwright-web-flake, update lockfile, and test
+[group('workspace')]
+update-playwright: check-playwright
+  #!/usr/bin/env bash
+  set -euo pipefail
+  FLAKE_VERSION=$(grep "playwright-web-flake.url" flake.nix | sed 's/.*\/\([0-9.]*\)".*/\1/')
+  echo "Updating @playwright/test to ^$FLAKE_VERSION..."
+  cd packages/docs
+  # Use jq to update package.json
+  jq ".devDependencies.\"@playwright/test\" = \"^$FLAKE_VERSION\"" package.json > package.json.tmp
+  mv package.json.tmp package.json
+  cd ../..
+  echo "Running bun install to update lockfile..."
+  bun install
+  echo "Running tests to verify..."
+  just docs-test
+
 # Clean all workspace build artifacts
 [group('workspace')]
 clean:
