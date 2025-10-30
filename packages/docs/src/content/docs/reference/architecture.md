@@ -121,7 +121,7 @@ docs: update installation guide
 - Clear documentation in CONTRIBUTING.md
 - Semantic-release requires proper format for version bumps
 
-See [CONTRIBUTING.md](/CONTRIBUTING.md) for detailed conventional commit guidelines.
+See [CONTRIBUTING.md](https://github.com/sciexp/typescript-nix-template/blob/main/CONTRIBUTING.md) for detailed conventional commit guidelines.
 
 ## Workspace configuration
 
