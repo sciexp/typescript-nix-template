@@ -86,7 +86,8 @@ ghsecrets repo="":
   sops exec-env vars/shared.yaml '\
   gh secret set CACHIX_AUTH_TOKEN --repo='"$REPO"' --body="$CACHIX_AUTH_TOKEN" && \
   gh secret set CLOUDFLARE_ACCOUNT_ID --repo='"$REPO"' --body="$CLOUDFLARE_ACCOUNT_ID" && \
-  gh secret set CLOUDFLARE_API_TOKEN --repo='"$REPO"' --body="$CLOUDFLARE_API_TOKEN"'
+  gh secret set CLOUDFLARE_API_TOKEN --repo='"$REPO"' --body="$CLOUDFLARE_API_TOKEN" && \
+  gh secret set FAST_FORWARD_PAT --repo='"$REPO"' --body="$FAST_FORWARD_PAT"'
   echo
   echo "secrets after updates (wait 3 seconds for github to update):"
   sleep 3
