@@ -1,4 +1,6 @@
-# Rolldown-Vite Integration (Currently Disabled)
+---
+title: Rolldown-Vite Integration (Currently Disabled)
+---
 
 ## Status
 
@@ -11,9 +13,11 @@
 ## Issue Details
 
 ### Problem
+
 Rolldown's bundler generates runtime code that uses Node.js's `createRequire(import.meta.url)`, which fails in Cloudflare Workers because `import.meta.url` is undefined in that execution context.
 
 ### Error
+
 ```
 ✘ [ERROR] service core:user:typescript-nix-template: Uncaught TypeError:
 The argument 'path' must be a file URL object, a file URL string, or an absolute path string.
@@ -26,16 +30,19 @@ at null.<anonymous> (index.js:1203:33) in dist/_worker.js/chunks/rolldown-runtim
 ### Investigation Results
 
 **GitHub Issues & PRs**:
-- Issue: https://github.com/cloudflare/workers-sdk/issues/9415 (Closed)
-- Fix Merged: https://github.com/cloudflare/workers-sdk/pull/9891 (July 18, 2025)
+
+- Issue: <https://github.com/cloudflare/workers-sdk/issues/9415> (Closed)
+- Fix Merged: <https://github.com/cloudflare/workers-sdk/pull/9891> (July 18, 2025)
 
 **Root Cause**:
+
 - The fix in PR #9891 sets `rollupOptions.platform: "neutral"` to prevent rolldown's Node.js polyfills
 - **Critical limitation**: The fix only applies to `@cloudflare/vite-plugin`, not `@astrojs/cloudflare`
 - We use `@astrojs/cloudflare` adapter which internally manages Vite configuration
 - No direct way to apply the platform: "neutral" fix through Astro's adapter layer
 
 **Attempted Workarounds** (all unsuccessful):
+
 1. Setting `vite.build.rollupOptions.platform: "neutral"` in astro.config.mjs
 2. Setting `vite.ssr.build.rollupOptions.platform: "neutral"`
 3. Setting `vite.optimizeDeps.esbuildOptions.platform: "neutral"`
@@ -49,11 +56,13 @@ When rolldown compatibility is resolved with Astro + Cloudflare, follow these st
 ### Step 1: Update package.json
 
 Add to `devDependencies`:
+
 ```json
 "vite": "npm:rolldown-vite@latest"
 ```
 
 Add new `overrides` section at root level:
+
 ```json
 "overrides": {
   "vite": "npm:rolldown-vite@latest"
@@ -63,6 +72,7 @@ Add new `overrides` section at root level:
 ### Step 2: Update astro.config.mjs
 
 1. Uncomment the vite import at the top:
+
    ```javascript
    import * as vite from "vite";
    ```
@@ -86,43 +96,51 @@ bun run preview
 ```
 
 **Success Criteria**:
+
 - Build completes without errors
 - No `createRequire` in `dist/_worker.js/chunks/rolldown-runtime_*.mjs`
 - Wrangler dev starts successfully
-- Site loads at http://localhost:8787
+- Site loads at <http://localhost:8787>
 
 ## Alternative Paths Forward
 
 ### Option A: Wait for Official Support
-- Monitor Astro + Rolldown roadmap: https://github.com/rolldown/rolldown/discussions/153
+
+- Monitor Astro + Rolldown roadmap: <https://github.com/rolldown/rolldown/discussions/153>
 - Currently "on hold" for Astro support
-- Subscribe to: https://github.com/withastro/adapters/issues
+- Subscribe to: <https://github.com/withastro/adapters/issues>
 
 ### Option B: Migrate to @cloudflare/vite-plugin
+
 If Astro adds support for using `@cloudflare/vite-plugin` directly:
 
 **Pros**:
+
 - Direct access to rolldown compatibility fixes
 - Native Workers runtime in dev server
 - Official Cloudflare support
 
 **Cons**:
+
 - Would lose Astro-specific adapter features
 - Significant configuration changes required
 - Unknown SSR parity with `@astrojs/cloudflare`
 
 **Resources**:
-- https://developers.cloudflare.com/workers/vite-plugin/
-- https://blog.cloudflare.com/introducing-the-cloudflare-vite-plugin/
+
+- <https://developers.cloudflare.com/workers/vite-plugin/>
+- <https://blog.cloudflare.com/introducing-the-cloudflare-vite-plugin/>
 
 ## Performance Comparison
 
 **Standard Vite** (current):
+
 - Server build: ~900ms
 - Client build: ~34ms
 - Total: ~1.6s
 
 **Rolldown-Vite** (when tested):
+
 - Server build: ~890ms (similar)
 - Client build: ~33ms (similar)
 - Total: ~1.6s
@@ -133,6 +151,7 @@ Reference projects report 2-16x improvements.
 ## Dependencies
 
 The `@astrojs/cloudflare` adapter currently depends on:
+
 ```json
 {
   "@cloudflare/workers-types": "^4.20250109.0",
