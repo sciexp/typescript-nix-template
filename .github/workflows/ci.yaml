@@ -25,6 +25,11 @@ on:
         required: false
         type: boolean
         default: false
+      force_run:
+        description: "Force execution even if already successful for this commit"
+        required: false
+        type: boolean
+        default: false
   workflow_call:
   pull_request:
     types: [opened, labeled, reopened, synchronize]
@@ -47,27 +52,11 @@ permissions:
   id-token: write
 
 jobs:
-  # job 0: skip-check
-  # prevents duplicate workflow runs on same commit hash
-  skip-check:
-    runs-on: ubuntu-latest
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # ratchet:fkirc/skip-duplicate-actions@v5
-        with:
-          skip_after_successful_duplicate: 'true'
-          do_not_skip: '["schedule"]'
-          concurrent_skipping: 'never'
-          cancel_others: 'false'
-
   # job 1: secrets-scan
   # scans repository for hardcoded secrets using gitleaks
-  # ALWAYS runs (ignores skip-check) - security critical
+  # Security critical - runs for all commits
   secrets-scan:
     name: gitleaks
-    needs: skip-check
     runs-on: ubuntu-latest
     if: |
       !cancelled() &&
@@ -78,9 +67,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Required for git diff in composite action and comprehensive secret scanning
+
+      - name: Check execution cache
+        id: cache
+        uses: ./.github/actions/cached-ci-job
+        with:
+          force-run: ${{ inputs.force_run || 'false' }}
+          # No path-filters - security scanning always relevant
 
       - name: Setup Nix
+        if: steps.cache.outputs.should-run == 'true'
         uses: ./.github/actions/setup-nix
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
@@ -90,13 +87,14 @@ jobs:
           enable-cachix: true
 
       - name: Scan for secrets with gitleaks
+        if: steps.cache.outputs.should-run == 'true'
         run: nix develop -c just scan-secrets
 
   # job 2: set-variables
   # determines deployment settings and variables based on event type
-  # ALWAYS runs (ignores skip-check) - needed for job routing
+  # Always runs - needed for production job routing and provides outputs
   set-variables:
-    needs: [skip-check, secrets-scan]
+    needs: [secrets-scan]
     runs-on: ubuntu-latest
     if: |
       !cancelled() &&
@@ -186,10 +184,9 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-    needs: [skip-check, set-variables]
+    needs: [secrets-scan, set-variables]
     if: |
       !cancelled() &&
-      needs.skip-check.outputs.should_skip != 'true' &&
       needs.set-variables.outputs.skip_ci != 'true' &&
       (github.event_name != 'workflow_dispatch' ||
        inputs.job == '' ||
@@ -199,7 +196,18 @@ jobs:
       cancel-in-progress: true
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for git diff in composite action
+
+      - name: Check execution cache
+        id: cache
+        uses: ./.github/actions/cached-ci-job
+        with:
+          path-filters: '\.nix$|flake\.lock|justfile|packages/.*\.(ts|tsx|js|jsx)|.*\.config\.(ts|js)|package\.json|.*\.lock'
+          force-run: ${{ inputs.force_run || 'false' }}
+
       - name: Setup Nix
+        if: steps.cache.outputs.should-run == 'true'
         uses: ./.github/actions/setup-nix
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
@@ -209,14 +217,21 @@ jobs:
           enable-cachix: true
           cachix-name: ${{ vars.CACHIX_CACHE_NAME }}
           cachix-auth-token: ${{ secrets.CACHIX_AUTH_TOKEN }}
+
       - name: Setup tmate debug session
+        if: steps.cache.outputs.should-run == 'true' && needs.set-variables.outputs.debug == 'true'
         uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # ratchet:mxschmitt/action-tmate@v3
-        if: ${{ needs.set-variables.outputs.debug == 'true' }}
+
       - name: Install omnix
+        if: steps.cache.outputs.should-run == 'true'
         run: nix --accept-flake-config profile install "github:juspay/omnix"
+
       - name: Summarize flake
+        if: steps.cache.outputs.should-run == 'true'
         run: om show .
+
       - name: Run flake CI and push to cachix
+        if: steps.cache.outputs.should-run == 'true'
         env:
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: |
@@ -224,16 +239,18 @@ jobs:
             om ci run | tee /dev/stderr | cachix push "$CACHIX_CACHE_NAME"
           '
 
+  # Note: Reusable workflow calls cannot use composite action steps directly
+  # Per-matrix-element caching happens via GitHub Checks API based on job name: test (package-name)
   test:
-    needs: [skip-check, set-variables]
+    needs: [secrets-scan, set-variables]
     if: |
       !cancelled() &&
-      needs.skip-check.outputs.should_skip != 'true' &&
       needs.set-variables.outputs.skip_ci != 'true' &&
       (github.event_name != 'workflow_dispatch' ||
        inputs.job == '' ||
        inputs.job == 'test')
     strategy:
+      fail-fast: false
       matrix:
         package: ${{ fromJson(needs.set-variables.outputs.packages) }}
     uses: ./.github/workflows/package-test.yaml
@@ -320,7 +337,7 @@ jobs:
 
   # job 5: production-release-packages
   # Release packages to production on main/beta branches
-  # IGNORES skip-check but REQUIRES test+nix success/skipped (safe for fast-forward merge)
+  # Requires test+nix success/skipped (safe for fast-forward merge)
   production-release-packages:
     needs: [set-variables, test, nix]
     if: |
@@ -347,7 +364,7 @@ jobs:
 
   # job 6: production-docs-deploy
   # Documentation deployment to production (conditional)
-  # IGNORES skip-check - depends on production-release-packages to ensure packages released first
+  # Depends on production-release-packages to ensure packages released first
   production-docs-deploy:
     needs: [set-variables, test, production-release-packages]
     if: |
