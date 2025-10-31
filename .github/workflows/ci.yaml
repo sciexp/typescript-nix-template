@@ -73,7 +73,9 @@ jobs:
         uses: ./.github/actions/cached-ci-job
         with:
           force-run: ${{ inputs.force_run || 'false' }}
-          # No path-filters - security scanning always relevant
+          # No path-filters - security scanning always relevant when code changes
+          # Cache provides value for workflow retries (don't re-scan unchanged commits)
+          # Commit SHA is content-addressed: same SHA = same content = same security posture
 
       - name: Setup Nix
         if: steps.cache.outputs.should-run == 'true'
