@@ -56,7 +56,6 @@ jobs:
   # scans repository for hardcoded secrets using gitleaks
   # Security critical - runs for all commits
   secrets-scan:
-    name: gitleaks
     runs-on: ubuntu-latest
     if: |
       !cancelled() &&
