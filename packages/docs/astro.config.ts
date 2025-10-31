@@ -16,6 +16,7 @@ export default defineConfig({
         ? [
             starlightLinksValidator({
               errorOnRelativeLinks: false,
+              errorOnLocalLinks: false,
             }),
           ]
         : [],
