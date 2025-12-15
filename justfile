@@ -85,8 +85,32 @@ lint:
 
 # Check and fix code with Biome
 [group('CI/CD')]
-check:
+biome-check:
   cd packages/docs && bun run check:fix
+
+# Build specific nix category (for CI matrix distribution)
+[group('CI/CD')]
+ci-build-category system category:
+  @./scripts/ci/ci-build-category.sh "{{system}}" "{{category}}"
+
+# Validate flake structure and required recipes
+[group('CI/CD')]
+validate-flake:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  echo "Validating flake structure..."
+  REQUIRED_RECIPES="check lint fmt test"
+  JUST_RECIPES=$(just --summary)
+  for recipe in $REQUIRED_RECIPES; do
+    if echo "$JUST_RECIPES" | grep -qw "$recipe"; then
+      echo "OK: '$recipe' recipe found"
+    else
+      echo "ERROR: '$recipe' recipe not found"
+      exit 1
+    fi
+  done
+  echo "Running nix flake check..."
+  nix flake check --impure
 
 # Run pre-commit hooks
 [group('CI/CD')]
@@ -557,25 +581,45 @@ docs-optimize-favicon:
 
 ## Nix
 
-# Enter the Nix development shell
+# Validate the Nix flake configuration (all checks including treefmt, nix-unit)
 [group('nix')]
-nix-dev:
-    nix develop
+check:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  echo "Running nix flake check..."
+  echo ""
+  echo "Note: nix-unit warnings are expected and harmless:"
+  echo "  - 'unknown setting allowed-users/trusted-users' (daemon settings don't apply in pure eval)"
+  echo "  - '--gc-roots-dir not specified' (nix-unit doesn't persist GC roots)"
+  echo "  - 'input has an override for non-existent input self' (nix-unit internal mechanism)"
+  echo "  - 'not writing modified lock file' (expected for read-only check)"
+  echo ""
+  nix flake check --impure
 
-# Validate the Nix flake configuration
+# Format all files with treefmt (via nix fmt)
 [group('nix')]
-flake-check:
-    nix flake check --impure
+fmt:
+  nix fmt
+
+# Check formatting without modifying
+[group('nix')]
+fmt-check:
+  nix develop -c treefmt --check .
 
 # Update all flake inputs to their latest versions
 [group('nix')]
 flake-update:
-    nix flake update --impure
+  nix flake update --impure
+
+# Enter the Nix development shell
+[group('nix')]
+dev:
+  nix develop
 
 # Build the documentation package with Nix
 [group('nix')]
 nix-build:
-    nix build .#docs
+  nix build .#docs
 
 ## Release
 
