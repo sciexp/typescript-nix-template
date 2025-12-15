@@ -6,17 +6,17 @@
  * Generic test context type for shared test setup
  */
 export interface TestContext<T = unknown> {
-  data: T;
-  cleanup: () => void | Promise<void>;
+	data: T;
+	cleanup: () => void | Promise<void>;
 }
 
 /**
  * Type for component render result
  */
 export interface RenderResult {
-  html: string;
-  text: string;
-  container: unknown;
+	html: string;
+	text: string;
+	container: unknown;
 }
 
 /**
