@@ -1,7 +1,7 @@
 { inputs, ... }:
 {
   imports = [
-    # flake-parts.flakeModules.modules deferred until needed for complex module composition
-    # nix-unit will be added in Phase 3
+    inputs.flake-parts.flakeModules.modules # Enable flake.modules merging
+    inputs.nix-unit.modules.flake.default
   ];
 }
