@@ -22,15 +22,6 @@
   };
 
   outputs =
-    inputs@{
-      self,
-      flake-parts,
-      nixpkgs,
-      ...
-    }:
-    flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = import inputs.systems;
-
-      imports = with builtins; map (fn: ./nix/modules/${fn}) (attrNames (readDir ./nix/modules));
-    };
+    inputs@{ flake-parts, ... }:
+    flake-parts.lib.mkFlake { inherit inputs; } (inputs.import-tree ./modules);
 }
