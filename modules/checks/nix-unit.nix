@@ -8,6 +8,7 @@
           nixpkgs
           flake-parts
           treefmt-nix
+          import-tree
           ;
         inherit self;
       };
