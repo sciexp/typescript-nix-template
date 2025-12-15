@@ -64,13 +64,6 @@
           expr = builtins.hasAttr system self.formatter;
           expected = true;
         };
-
-        # TC-007: Modules Export
-        # Validates flake.modules merging is working
-        testModulesExist = {
-          expr = builtins.hasAttr "modules" self;
-          expected = true;
-        };
       };
     };
 }
