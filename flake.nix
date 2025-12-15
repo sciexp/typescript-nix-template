@@ -10,6 +10,8 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
 
+    import-tree.url = "github:vic/import-tree";
+
     git-hooks.url = "github:cachix/git-hooks.nix";
     git-hooks.flake = false;
 
