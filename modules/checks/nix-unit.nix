@@ -9,6 +9,9 @@
           flake-parts
           treefmt-nix
           import-tree
+          git-hooks
+          playwright-web-flake
+          nix-unit
           ;
         inherit self;
       };
