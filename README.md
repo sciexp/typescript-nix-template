@@ -164,10 +164,10 @@ The docs package deploys to Cloudflare Workers:
 just cf-preview
 
 # Deploy preview for branch
-just cf-deploy-preview <branch>
+just docs-deploy-preview <branch>
 
 # Deploy to production
-just cf-deploy-production
+just docs-deploy-production
 ```
 
 ## Releases
