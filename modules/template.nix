@@ -61,5 +61,106 @@
         See README.md for full documentation.
       '';
     };
+
+    # https://omnix.page/om/init.html#spec
+    om.templates.typescript-nix-template = {
+      template = templates.default;
+      params = [
+        {
+          name = "project-name";
+          description = "Repository and package name";
+          placeholder = "typescript-nix-template";
+        }
+        {
+          name = "npm-scope";
+          description = "Full npm scope with @ prefix";
+          placeholder = "@typescript-nix-template";
+        }
+        {
+          name = "git-org";
+          description = "GitHub organization or user name";
+          placeholder = "sciexp";
+        }
+        {
+          name = "author";
+          description = "Package author name";
+          placeholder = "Your Name";
+        }
+        {
+          name = "author-email";
+          description = "Author email address";
+          placeholder = "your.email@example.com";
+        }
+        {
+          name = "project-description";
+          description = "Project description for documentation and package.json";
+          placeholder = "A TypeScript monorepo template with Nix, Bun workspaces, and semantic-release";
+        }
+        {
+          name = "cloudflare-worker-name";
+          description = "Cloudflare worker name for docs deployment";
+          placeholder = "ts-nix-docs";
+        }
+        {
+          name = "production-url";
+          description = "Production domain for documentation site";
+          placeholder = "ts-nix.scientistexperience.net";
+        }
+        {
+          name = "github-ci";
+          description = "Include GitHub Actions workflow configuration";
+          paths = [ ".github" ];
+          value = true;
+        }
+        {
+          name = "vscode";
+          description = "Include VSCode settings folder";
+          paths = [ ".vscode" ];
+          value = true;
+        }
+        {
+          name = "docs";
+          description = "Include documentation package (Astro Starlight + Cloudflare deployment)";
+          paths = [
+            "packages/docs"
+            ".github/workflows/deploy-docs.yaml"
+          ];
+          value = true;
+        }
+        {
+          name = "nix-template";
+          description = "Keep the flake template machinery in the project";
+          paths = [
+            "**/template.nix"
+            ".github/workflows/template.yaml"
+          ];
+          value = false;
+        }
+      ];
+      tests = {
+        default = {
+          params = {
+            project-name = "awesome-ts-project";
+            npm-scope = "@awesome-ts-project";
+            git-org = "example-org";
+            author = "Jane Doe";
+            author-email = "jane@example.com";
+            project-description = "An awesome TypeScript project";
+            cloudflare-worker-name = "awesome-docs";
+            production-url = "awesome.example.com";
+          };
+          asserts = {
+            source = {
+              "package.json" = true;
+              "flake.nix" = true;
+              ".github/workflows/ci.yaml" = true;
+              ".vscode" = true;
+              "modules/template.nix" = false;
+            };
+            packages.default = { };
+          };
+        };
+      };
+    };
   };
 }
