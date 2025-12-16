@@ -73,7 +73,7 @@ jobs:
         uses: ./.github/actions/cached-ci-job
         with:
           force-run: ${{ inputs.force_run || 'false' }}
-          # No path-filters - security scanning always relevant when code changes
+          # No hash-sources - security scanning always relevant when code changes
           # Cache provides value for workflow retries (don't re-scan unchanged commits)
           # Commit SHA is content-addressed: same SHA = same content = same security posture
 
@@ -201,7 +201,7 @@ jobs:
         id: cache
         uses: ./.github/actions/cached-ci-job
         with:
-          path-filters: '\.nix$|flake\.lock|justfile'
+          hash-sources: '**/*.nix flake.lock justfile'
           force-run: ${{ inputs.force_run || 'false' }}
 
       - name: Setup Nix
@@ -283,7 +283,8 @@ jobs:
         id: cache
         uses: ./.github/actions/cached-ci-job
         with:
-          path-filters: '\.nix$|flake\.lock|justfile|packages/.*\.(ts|tsx|js|jsx)|.*\.config\.(ts|js)|package\.json|.*\.lock'
+          check-name: nix (${{ matrix.category }}, ${{ matrix.system }})
+          hash-sources: '**/*.nix flake.lock justfile packages/**/*.ts packages/**/*.tsx packages/**/*.js packages/**/*.jsx **/*.config.ts **/*.config.js package.json **/*.lock .github/actions/**/*'
           force-run: ${{ inputs.force_run || 'false' }}
 
       - name: Setup Nix
