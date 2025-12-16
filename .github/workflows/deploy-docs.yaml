@@ -118,10 +118,10 @@ jobs:
         run: |
           if [ "${{ inputs.environment }}" = "preview" ]; then
             echo "Deploying preview for branch: ${{ inputs.branch }}"
-            nix develop --accept-flake-config -c just cf-deploy-preview ${{ inputs.branch }}
+            nix develop --accept-flake-config -c just docs-deploy-preview ${{ inputs.branch }}
           else
             echo "Deploying to production (promoting existing version if available)"
-            nix develop --accept-flake-config -c just cf-deploy-production
+            nix develop --accept-flake-config -c just docs-deploy-production
           fi
 
       - name: Create job result marker
