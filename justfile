@@ -909,15 +909,27 @@ template-verify:
   echo "Verifying template from $FLAKE_DIR"
   echo "Using temp directory: $TEMP_DIR"
 
+  # Test parameters for non-interactive verification
+  TEST_PARAMS='{
+    "project-name": "test-project",
+    "npm-scope": "@test-project",
+    "git-org": "test-org",
+    "author": "Test Author",
+    "author-email": "test@example.com",
+    "project-description": "Test project for template verification",
+    "cloudflare-worker-name": "test-docs",
+    "production-url": "test.example.com"
+  }'
+
   # Use om if available, otherwise fall back to nix run with --accept-flake-config
   # to use omnix binary cache (https://cache.nixos.asia/oss) and avoid recompilation
   if command -v om &> /dev/null; then
     echo "Using installed om command"
-    om init "$FLAKE_DIR#default" -o "$TEMP_DIR/test-project"
+    om init "$FLAKE_DIR" -o "$TEMP_DIR/test-project" --non-interactive --params "$TEST_PARAMS"
   else
     echo "om not found, using nix run (fetching from cache.nixos.asia)"
     nix --accept-flake-config run github:juspay/omnix/v1.3.0 -- \
-      init "$FLAKE_DIR#default" -o "$TEMP_DIR/test-project"
+      init "$FLAKE_DIR" -o "$TEMP_DIR/test-project" --non-interactive --params "$TEST_PARAMS"
   fi
 
   cd "$TEMP_DIR/test-project"
