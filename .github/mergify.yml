@@ -1,3 +1,34 @@
+shared:
+  base_conditions: &base_conditions
+    - label!=work-in-progress
+    - -draft
+    - -conflict
+
+  required_checks: &required_checks
+    - check-success=skip-check
+    - check-success=gitleaks
+    - check-success=set-variables
+    - or:
+        - check-success=nix
+        - check-skipped=nix
+    - or:
+        - check-success=test (docs)
+        - check-skipped=test (docs)
+    - check-success=PR Check Fast-forward
+
+  human_author_conditions: &human_author_conditions
+    - author!=renovate[bot]
+    - author!=mergify[bot]
+    - author!=github-actions[bot]
+    - label!=flake-update
+
+  bot_author_conditions: &bot_author_conditions
+    - or:
+        - author=renovate[bot]
+        - author=mergify[bot]
+        - author=github-actions[bot]
+        - label=flake-update
+
 pull_request_rules:
   - name: self-assign PRs
     conditions:
@@ -8,25 +39,26 @@ pull_request_rules:
       assign:
         add_users:
           - "{{ author }}"
-  - name: automatic merge to queue
+
+  - name: queue human PRs
     conditions:
       - "#approved-reviews-by>=1"
-      - label!=work-in-progress
-      - -draft
-      - -conflict
-      - check-success=skip-check
-      - check-success=gitleaks
-      - check-success=set-variables
-      - or:
-        - check-success=nix
-        - check-skipped=nix
-      - or:
-        - check-success=test (docs)
-        - check-skipped=test (docs)
-      - check-success=PR Check Fast-forward
+      - and: *base_conditions
+      - and: *human_author_conditions
+      - and: *required_checks
     actions:
       queue:
         name: default
+
+  - name: queue bot PRs
+    conditions:
+      - "#approved-reviews-by>=1"
+      - and: *base_conditions
+      - and: *bot_author_conditions
+      - and: *required_checks
+    actions:
+      queue:
+        name: bot-updates
 
 queue_rules:
   - name: default
@@ -36,9 +68,25 @@ queue_rules:
     batch_size: 1
     checks_timeout: 3600
     queue_conditions:
-      - check-success=skip-check
+      - -conflict
     merge_conditions:
-      - check-success=skip-check
+      - and: *required_checks
+    commit_message_template: |
+      {{ title }} (#{{ number }})
+
+      {{ body }}
+
+  - name: bot-updates
+    merge_method: fast-forward
+    update_method: rebase
+    update_bot_account: cameronraysmith
+    batch_size: 10
+    batch_max_wait_time: 5 min
+    checks_timeout: 3600
+    queue_conditions:
+      - -conflict
+    merge_conditions:
+      - and: *required_checks
     commit_message_template: |
       {{ title }} (#{{ number }})
 
