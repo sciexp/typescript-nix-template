@@ -21,11 +21,9 @@
 
         # TC-001: Flake Structure Smoke Test
         # Validates flake has required top-level outputs
+        # Note: templates is optional (only present when nix-template param is true)
         testMetadataFlakeOutputsExist = {
-          expr =
-            (builtins.hasAttr "devShells" self)
-            && (builtins.hasAttr "checks" self)
-            && (builtins.hasAttr "templates" self);
+          expr = (builtins.hasAttr "devShells" self) && (builtins.hasAttr "checks" self);
           expected = true;
         };
 
@@ -54,15 +52,7 @@
 
         # Feature Tests
 
-        # TC-005: Template Exports
-        # Validates templates output exists and is not empty
-        testTemplateExists = {
-          expr =
-            builtins.hasAttr "templates" self && (builtins.length (builtins.attrNames self.templates) > 0);
-          expected = true;
-        };
-
-        # TC-006: Formatter Available
+        # TC-005: Formatter Available
         # Validates formatter is configured for current system
         testFormatterExists = {
           expr = builtins.hasAttr system self.formatter;
