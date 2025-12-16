@@ -349,8 +349,8 @@ cf-build-deploy: install
   bun run --filter '@typescript-nix-template/docs' deploy
 
 # Deploy preview version with aliased preview URL for branch
-[group('cloudflare')]
-cf-deploy-preview branch=`git branch --show-current`:
+[group('docs')]
+docs-deploy-preview branch=`git branch --show-current`:
   #!/usr/bin/env bash
   set -euo pipefail
   cd packages/docs
@@ -396,8 +396,8 @@ cf-deploy-preview branch=`git branch --show-current`:
   echo "  Preview URL: https://b-{{branch}}-ts-nix-docs.sciexp.workers.dev"
 
 # Deploy to production (promote existing version or fallback to build+deploy)
-[group('cloudflare')]
-cf-deploy-production:
+[group('docs')]
+docs-deploy-production:
   #!/usr/bin/env bash
   set -euo pipefail
   cd packages/docs
@@ -486,8 +486,8 @@ cf-deploy-production:
   fi
 
 # List recent versions
-[group('cloudflare')]
-cf-versions limit="10":
+[group('docs')]
+docs-versions limit="10":
   cd packages/docs && sops exec-env ../../vars/shared.yaml "bunx wrangler versions list --limit {{limit}}"
 
 # View specific version details
@@ -501,13 +501,13 @@ cf-versions-deploy:
   cd packages/docs && sops exec-env ../../vars/shared.yaml "bunx wrangler versions deploy"
 
 # Tail live logs from Cloudflare Workers
-[group('cloudflare')]
-cf-tail:
+[group('docs')]
+docs-tail:
   cd packages/docs && sops exec-env ../../vars/shared.yaml "bunx wrangler tail"
 
 # List deployments
-[group('cloudflare')]
-cf-deployments:
+[group('docs')]
+docs-deployments:
   cd packages/docs && sops exec-env ../../vars/shared.yaml "bunx wrangler deployments list"
 
 # Generate Cloudflare Worker types
