@@ -92,6 +92,8 @@ bun test
 
 </details>
 
+<details><summary>Version pinning options</summary>
+
 You may want to update the git ref/rev of the template if you need to pin to a particular version:
 
 - `github:sciexp/typescript-nix-template/main`
@@ -99,7 +101,9 @@ You may want to update the git ref/rev of the template if you need to pin to a p
 - `github:sciexp/typescript-nix-template/3289dla`
 - `github:sciexp/typescript-nix-template/devbranch`
 
-### Template parameters
+</details>
+
+<details><summary>Template parameters</summary>
 
 | Parameter | Description |
 | :-------- | :---------- |
@@ -116,11 +120,13 @@ You may want to update the git ref/rev of the template if you need to pin to a p
 | `docs` | Include Astro Starlight documentation site |
 | `nix-template` | Include template.nix for re-templating capability |
 
+</details>
+
 ## Packages
 
 - **[@typescript-nix-template/docs](./packages/docs)**: Astro Starlight documentation site [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
 
-## Project structure
+<details><summary>Project structure</summary>
 
 ```
 typescript-nix-template/
@@ -147,6 +153,8 @@ typescript-nix-template/
 ├── justfile                     # Development task runner
 └── CONTRIBUTING.md              # Contribution guidelines
 ```
+
+</details>
 
 ## Getting started
 
@@ -261,7 +269,7 @@ just docs-test-unit
 just docs-test-e2e
 ```
 
-### Using bun directly
+<details><summary>Using bun directly</summary>
 
 ```bash
 # Run command in specific package
@@ -272,6 +280,8 @@ bun run --filter '@typescript-nix-template/docs' test
 # Run command in all packages
 bun run --filter '@typescript-nix-template/*' test
 ```
+
+</details>
 
 ## Testing
 
@@ -334,7 +344,7 @@ GitHub Actions workflows use category-based matrix builds for efficient parallel
 - **package-test**: Unit tests, coverage, and E2E tests for each package
 - **deploy-docs**: Preview and production deployments to Cloudflare Workers
 
-### Local CI equivalence
+<details><summary>Local CI equivalence</summary>
 
 Any CI job can be reproduced locally using the same commands:
 
@@ -343,6 +353,8 @@ nix develop -c just check              # Flake validation
 nix develop -c just ci-build-category aarch64-darwin packages  # Build specific category
 nix develop -c just scan-secrets       # Security scanning
 ```
+
+</details>
 
 ## Contributing
 
