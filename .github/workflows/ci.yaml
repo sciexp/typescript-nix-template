@@ -302,11 +302,23 @@ jobs:
           echo "Testing --version flag..."
           bash scripts/bootstrap.sh --version
 
-      - name: test bootstrap.sh --dry-run
+      - name: test bootstrap.sh --dry-run (local)
         if: steps.cache.outputs.should-run == 'true'
         run: |
-          echo "Testing --dry-run mode..."
+          echo "Testing --dry-run mode (local script)..."
           bash scripts/bootstrap.sh --dry-run --yes
+
+      - name: test bootstrap.sh one-liner (remote curl)
+        if: steps.cache.outputs.should-run == 'true'
+        run: |
+          # Test the actual one-liner pattern users will use, but with PR branch
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          REPO="${{ github.repository }}"
+          URL="https://raw.githubusercontent.com/${REPO}/${BRANCH}/scripts/bootstrap.sh"
+          echo "Testing remote one-liner pattern..."
+          echo "URL: ${URL}"
+          echo ""
+          bash <(curl --proto '=https' --tlsv1.2 -sSf "${URL}") --dry-run --yes
 
       - name: run bootstrap.sh (actual installation)
         if: steps.cache.outputs.should-run == 'true'
