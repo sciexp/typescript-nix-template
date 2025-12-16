@@ -89,16 +89,15 @@ jobs:
       group: test-omnix-template-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
       cancel-in-progress: true
     steps:
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -yq zstd
-          sudo apt-get clean
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
 
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@e50d5f73bfe71c2dd0aa4218de8f4ade1f4571fa # ratchet:DeterminateSystems/nix-installer-action@main
+      - name: Setup Nix
+        uses: ./.github/actions/setup-nix
         with:
-          extra-conf: "system-features = nixos-test benchmark big-parallel kvm"
+          installer: quick
+          system: x86_64-linux
+          enable-cachix: false
 
       - name: Setup tmate debug session
         uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # ratchet:mxschmitt/action-tmate@v3
