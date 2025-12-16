@@ -11,6 +11,7 @@ default:
 ## Release
 ## Secrets
 ## Testing
+## Template
 
 ## Workspace
 
@@ -892,3 +893,12 @@ playwright-install:
   @echo "Note: When using 'nix develop', browsers are provided by Nix"
   @echo "This command is only needed in non-Nix environments"
   bunx playwright install --with-deps
+
+## Template
+
+# Verify template functionality by creating and checking a test project
+[group('template')]
+template-verify:
+  om init -t .#default ./tmp-verify-template
+  cd ./tmp-verify-template && nix flake check
+  rm -rf ./tmp-verify-template
