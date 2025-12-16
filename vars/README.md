@@ -13,6 +13,9 @@ GITGUARDIAN_API_KEY: your-gitguardian-api-key
 CACHIX_AUTH_TOKEN: your-cachix-auth-token
 CACHIX_CACHE_NAME: your-cachix-cache-name
 CI_AGE_KEY: your-ci-age-private-key
+FAST_FORWARD_PAT: your-github-pat-for-pr-merges
+FLAKE_UPDATER_APP_ID: your-github-app-id
+FLAKE_UPDATER_PRIVATE_KEY: your-github-app-private-key-pem
 ```
 
 ## Cloudflare Secrets
@@ -39,6 +42,19 @@ To deploy to Cloudflare Workers, you need:
 6. **CI_AGE_KEY**: Private age key for CI to decrypt secrets
    - This should be the private key corresponding to the CI public key in `.sops.yaml`
    - The public key in `.sops.yaml` is: `age1m9m8h5vqr7dqlmvnzcwshmm4uk8umcllazum6eaulkdp3qc88ugs22j3p8`
+
+## GitHub Automation Secrets
+
+7. **FAST_FORWARD_PAT**: Personal access token for PR fast-forward merges
+   - Create at: https://github.com/settings/tokens
+   - Required scopes: `repo` (full control of private repositories)
+
+8. **FLAKE_UPDATER_APP_ID** and **FLAKE_UPDATER_PRIVATE_KEY**: GitHub App credentials for automated flake input updates
+   - Create a GitHub App at: https://github.com/settings/apps/new
+   - Required permissions: Contents (Read and write), Pull requests (Read and write)
+   - After creation, generate and download a private key
+   - The App ID is displayed on the app's settings page
+   - Install the app on your repository
 
 ## Encrypting Secrets
 
