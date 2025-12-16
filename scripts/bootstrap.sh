@@ -506,11 +506,11 @@ generate_age_key() {
 print_banner() {
   if [[ "${QUIET}" != "true" ]]; then
     echo ""
-    echo "${BOLD}typescript-nix-template bootstrap${RESET}"
+    printf '%b\n' "${BOLD}typescript-nix-template bootstrap${RESET}"
     echo "Version: ${VERSION}"
     echo "Platform: ${NIX_PLATFORM}"
     if [[ "${DRY_RUN}" == "true" ]]; then
-      echo "${YELLOW}Mode: DRY RUN${RESET}"
+      printf '%b\n' "${YELLOW}Mode: DRY RUN${RESET}"
     fi
     echo ""
   fi
