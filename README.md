@@ -34,25 +34,41 @@ typescript-nix-template/
 ├── package.json                 # Workspace root configuration
 ├── tsconfig.json                # Shared TypeScript configuration
 ├── flake.nix                    # Nix flake entrypoint
-├── justfile                     # Task runner commands
+├── Makefile                     # Bootstrap commands (nix/direnv install)
+├── justfile                     # Development task runner
 └── CONTRIBUTING.md              # Contribution guidelines
 ```
 
 ## Getting started
 
-### Prerequisites
+### Bootstrap (first time)
 
-- [Nix](https://nixos.org/download.html) with flakes enabled
-- [direnv](https://direnv.net/) (recommended)
-
-### Setup
+If you don't have Nix installed, the Makefile provides bootstrap commands that work without any dependencies:
 
 ```bash
 # Clone the repository
 git clone https://github.com/sciexp/typescript-nix-template.git
 cd typescript-nix-template
 
-# Enter Nix development shell
+# On macOS: install Xcode CLI tools and Homebrew first
+make bootstrap-prep-darwin
+
+# Install Nix and direnv
+make bootstrap
+
+# Start a new shell, then verify installation
+make verify
+
+# Generate age key for secrets (first time only)
+make setup-user
+```
+
+### Setup (Nix already installed)
+
+```bash
+# Clone and enter development shell
+git clone https://github.com/sciexp/typescript-nix-template.git
+cd typescript-nix-template
 nix develop
 
 # Install dependencies
