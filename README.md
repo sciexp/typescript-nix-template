@@ -156,7 +156,7 @@ typescript-nix-template/
 
 </details>
 
-## Getting started
+## Prerequisites
 
 ### Quick start (one-liner)
 
