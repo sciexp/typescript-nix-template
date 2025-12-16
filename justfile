@@ -897,8 +897,22 @@ playwright-install:
 ## Template
 
 # Verify template functionality by creating and checking a test project
+# Uses system temp directory to avoid nested git repo issues
 [group('template')]
 template-verify:
-  om init -t .#default ./tmp-verify-template
-  cd ./tmp-verify-template && nix flake check
-  rm -rf ./tmp-verify-template
+  #!/usr/bin/env bash
+  set -euo pipefail
+  FLAKE_DIR="{{ justfile_directory() }}"
+  TEMP_DIR=$(mktemp -d)
+  trap 'rm -rf "$TEMP_DIR"' EXIT
+  echo "Verifying template from $FLAKE_DIR"
+  echo "Using temp directory: $TEMP_DIR"
+  om init -t "$FLAKE_DIR#default" "$TEMP_DIR/test-project"
+  cd "$TEMP_DIR/test-project"
+  git init
+  git config user.email "test@example.com"
+  git config user.name "Test User"
+  git commit --allow-empty -m "initial commit (empty)"
+  git add .
+  nix flake check --accept-flake-config
+  echo "Template verification successful"
