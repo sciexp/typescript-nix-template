@@ -898,6 +898,7 @@ playwright-install:
 
 # Verify template functionality by creating and checking a test project
 # Uses system temp directory to avoid nested git repo issues
+# Falls back to nix run if om command is not installed
 [group('template')]
 template-verify:
   #!/usr/bin/env bash
@@ -907,7 +908,18 @@ template-verify:
   trap 'rm -rf "$TEMP_DIR"' EXIT
   echo "Verifying template from $FLAKE_DIR"
   echo "Using temp directory: $TEMP_DIR"
-  om init -t "$FLAKE_DIR#default" "$TEMP_DIR/test-project"
+
+  # Use om if available, otherwise fall back to nix run with --accept-flake-config
+  # to use omnix binary cache (https://cache.nixos.asia/oss) and avoid recompilation
+  if command -v om &> /dev/null; then
+    echo "Using installed om command"
+    om init -t "$FLAKE_DIR#default" "$TEMP_DIR/test-project"
+  else
+    echo "om not found, using nix run (fetching from cache.nixos.asia)"
+    nix --accept-flake-config run github:juspay/omnix/v1.3.0 -- \
+      init -t "$FLAKE_DIR#default" "$TEMP_DIR/test-project"
+  fi
+
   cd "$TEMP_DIR/test-project"
   git init
   git config user.email "test@example.com"
