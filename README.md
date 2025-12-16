@@ -43,15 +43,18 @@ typescript-nix-template/
 
 ### Quick start (one-liner)
 
-Install Nix, direnv, and generate secrets keys with a single command:
+Install Nix, direnv, and generate secrets keys with a single command.
+First, preview what the script will do:
 
 ```bash
-bash <(curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/sciexp/typescript-nix-template/main/scripts/bootstrap.sh)
+bash <(curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/sciexp/typescript-nix-template/main/scripts/bootstrap.sh) --dry-run
 ```
 
-Options: `--dry-run` to preview, `--yes` for non-interactive, `--help` for all options.
+Once you're comfortable with the actions it will take, remove `--dry-run` to execute.
+Use `--help` to see all options including `--yes` for non-interactive mode.
 
-### Manual bootstrap
+<details>
+<summary>Manual bootstrap</summary>
 
 Alternatively, clone first and use Make targets:
 
@@ -69,6 +72,8 @@ make bootstrap
 make verify
 make setup-user
 ```
+
+</details>
 
 ### Setup (Nix already installed)
 
