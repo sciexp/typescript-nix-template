@@ -26,6 +26,11 @@ on:
         required: false
         type: string
         default: ""
+      force-run:
+        description: "Force execution even if already successful"
+        required: false
+        type: boolean
+        default: false
 
   workflow_call:
     inputs:
@@ -52,6 +57,11 @@ on:
         required: false
         type: string
         default: ""
+      force-run:
+        description: "Force execution even if already successful"
+        required: false
+        type: string
+        default: "false"
     secrets:
       SOPS_AGE_KEY:
         required: true
@@ -88,27 +98,40 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
         with:
           fetch-depth: 0
-          fetch-tags: true  # Explicitly fetch all tags for version detection
           ref: ${{ inputs.checkout-ref != '' && inputs.checkout-ref || github.ref }}
           persist-credentials: false
 
+      # NOTE: Production releases intentionally DO NOT save cache results.
+      # This ensures fresh builds for all production deployments per ADR-0016.
+      # Cache lookup may skip if prior release already succeeded, but new
+      # releases always execute with current code state.
+      - name: Check execution cache
+        id: cache
+        uses: ./.github/actions/cached-ci-job
+        with:
+          check-name: ${{ inputs.package-name }}-release
+          hash-sources: 'packages/${{ inputs.package-name }}/**/* bun.lock justfile .github/actions/setup-nix/action.yaml .github/workflows/package-release.yaml'
+          force-run: ${{ inputs.force-run }}
+
       - name: Setup Nix
+        if: steps.cache.outputs.should-run == 'true'
         uses: ./.github/actions/setup-nix
         with:
           installer: quick
           system: x86_64-linux
-          enable-cachix: true
 
       - name: Install dependencies
-        run: nix develop -c bun install
+        if: steps.cache.outputs.should-run == 'true'
+        run: nix develop --accept-flake-config -c bun install
 
       - name: Run semantic-release
         id: semantic-release
+        if: steps.cache.outputs.should-run == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: |
-          nix develop -c just release-package ${{ inputs.package-name }} ${{ inputs.release-dry-run }}
+          nix develop --accept-flake-config -c just release-package ${{ inputs.package-name }} ${{ inputs.release-dry-run }}
 
       - name: Extract release info
         if: always()
