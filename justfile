@@ -149,7 +149,9 @@ ghsecrets repo="":
   gh secret set CACHIX_AUTH_TOKEN --repo='"$REPO"' --body="$CACHIX_AUTH_TOKEN" && \
   gh secret set CLOUDFLARE_ACCOUNT_ID --repo='"$REPO"' --body="$CLOUDFLARE_ACCOUNT_ID" && \
   gh secret set CLOUDFLARE_API_TOKEN --repo='"$REPO"' --body="$CLOUDFLARE_API_TOKEN" && \
-  gh secret set FAST_FORWARD_PAT --repo='"$REPO"' --body="$FAST_FORWARD_PAT"'
+  gh secret set FAST_FORWARD_PAT --repo='"$REPO"' --body="$FAST_FORWARD_PAT" && \
+  gh secret set FLAKE_UPDATER_APP_ID --repo='"$REPO"' --body="$FLAKE_UPDATER_APP_ID" && \
+  gh secret set FLAKE_UPDATER_PRIVATE_KEY --repo='"$REPO"' --body="$FLAKE_UPDATER_PRIVATE_KEY"'
   echo
   echo "secrets after updates (wait 3 seconds for github to update):"
   sleep 3
