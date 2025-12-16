@@ -109,7 +109,7 @@ jobs:
         id: cache
         uses: ./.github/actions/cached-ci-job
         with:
-          hash-sources: 'flake.nix flake.lock template/**/* .github/workflows/template.yaml .github/actions/setup-nix/action.yml'
+          hash-sources: 'flake.nix flake.lock modules/template.nix .github/workflows/template.yaml .github/actions/setup-nix/action.yml .github/actions/cached-ci-job/action.yaml'
           force-run: ${{ inputs.force_run || 'false' }}
 
       - name: Setup Nix
