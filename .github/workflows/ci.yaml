@@ -32,7 +32,7 @@ on:
         default: false
   workflow_call:
   pull_request:
-    types: [opened, labeled, reopened, synchronize]
+    types: [opened, reopened, synchronize]
     paths-ignore:
       - "*.md"
   push:
