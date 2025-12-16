@@ -172,8 +172,8 @@ verify: ## Verify nix installation and environment setup
 		exit 1; \
 	fi
 	@printf "\nChecking required tools in devShell: "
-	@if nix develop --command bash -c 'command -v bun && command -v biome && command -v just && command -v sops' >/dev/null 2>&1; then \
-		printf "● bun, biome, just, sops available\n"; \
+	@if nix develop --command bash -c 'command -v bun && command -v just && command -v sops' >/dev/null 2>&1; then \
+		printf "● bun, just, sops available\n"; \
 	else \
 		printf "some tools missing from devShell\n"; \
 		exit 1; \
