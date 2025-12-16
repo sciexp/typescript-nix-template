@@ -1,10 +1,11 @@
 # typescript-nix-template
 
-TypeScript project template with Nix, Bun workspaces, and semantic-release.
+TypeScript project template with Nix flake-parts, Bun workspaces, and semantic-release.
 
 ## Overview
 
-This is a monorepo workspace containing TypeScript packages managed with Bun workspaces, Nix for development environments, and semantic-release for automated versioning.
+This is a monorepo workspace combining TypeScript packages with a Nix flake that uses deferred module composition via import-tree.
+The architecture provides reproducible development environments, unified formatting with treefmt-nix, and comprehensive testing including nix-unit tests for flake validation.
 
 ## Packages
 
@@ -14,6 +15,15 @@ This is a monorepo workspace containing TypeScript packages managed with Bun wor
 
 ```
 typescript-nix-template/
+├── modules/                     # Nix flake-parts modules (import-tree)
+│   ├── checks/
+│   │   └── nix-unit.nix         # Flake validation tests
+│   ├── dev-shell.nix            # Development environment
+│   ├── flake-parts.nix          # Module composition
+│   ├── formatting.nix           # treefmt-nix configuration
+│   ├── packages.nix             # Nix package definitions
+│   ├── systems.nix              # Supported system architectures
+│   └── template.nix             # Flake template definition
 ├── packages/
 │   └── docs/                    # Astro Starlight documentation site
 │       ├── src/
@@ -23,7 +33,7 @@ typescript-nix-template/
 │       └── package.json
 ├── package.json                 # Workspace root configuration
 ├── tsconfig.json                # Shared TypeScript configuration
-├── flake.nix                    # Nix development environment
+├── flake.nix                    # Nix flake entrypoint
 ├── justfile                     # Task runner commands
 └── CONTRIBUTING.md              # Contribution guidelines
 ```
@@ -49,6 +59,37 @@ nix develop
 bun install
 ```
 
+## Nix architecture
+
+This template uses flake-parts with import-tree for deferred module composition.
+Modules in the `modules/` directory are automatically discovered and composed, separating concerns by aspect rather than bundling everything in `flake.nix`.
+
+Key modules:
+- **formatting.nix**: treefmt-nix configuration with biome (TypeScript/JSON) and nixfmt (Nix)
+- **dev-shell.nix**: Development tools (bun, biome, playwright, semantic-release, etc.)
+- **packages.nix**: Nix package definitions for the docs site
+- **checks/nix-unit.nix**: Flake validation tests ensuring outputs conform to expected structure
+
+### Formatting
+
+All formatting runs through treefmt-nix, providing a single command for all file types:
+
+```bash
+nix fmt                    # Format all files
+just fmt                   # Alias via just
+just fmt-check             # Check without modifying
+```
+
+Formatters configured: biome (TypeScript, JSON, JavaScript), nixfmt (Nix files).
+
+### Flake validation
+
+```bash
+nix flake check --impure   # Run all checks including nix-unit tests
+just check                 # Alias via just
+just validate-flake        # Validate flake structure and required recipes
+```
+
 ## Development
 
 ### Workspace commands
@@ -71,19 +112,19 @@ just docs <command>
 
 ```bash
 # Start dev server for docs
-just dev
+just docs-dev
 
 # Build docs
-just build
+just docs-build
 
 # Run tests
 just test
 
 # Run unit tests
-just test-unit
+just docs-test-unit
 
 # Run E2E tests
-just test-e2e
+just docs-test-e2e
 ```
 
 ### Using bun directly
@@ -149,6 +190,24 @@ just test-release docs
 
 # Test release for all packages
 just test-release-all
+```
+
+## CI/CD
+
+GitHub Actions workflows use category-based matrix builds for efficient parallelization:
+
+- **nix**: Flake checks and builds distributed across `packages`, `checks`, `devShells`, and `formatter` categories
+- **package-test**: Unit tests, coverage, and E2E tests for each package
+- **deploy-docs**: Preview and production deployments to Cloudflare Workers
+
+### Local CI equivalence
+
+Any CI job can be reproduced locally using the same commands:
+
+```bash
+nix develop -c just check              # Flake validation
+nix develop -c just ci-build-category aarch64-darwin packages  # Build specific category
+nix develop -c just scan-secrets       # Security scanning
 ```
 
 ## Contributing
