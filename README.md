@@ -7,6 +7,51 @@ TypeScript project template with Nix flake-parts, Bun workspaces, and semantic-r
 This is a monorepo workspace combining TypeScript packages with a Nix flake that uses deferred module composition via import-tree.
 The architecture provides reproducible development environments, unified formatting with treefmt-nix, and comprehensive testing including nix-unit tests for flake validation.
 
+## Prerequisites
+
+### Quick start (one-liner)
+
+Install Nix, direnv, and generate secrets keys with a single command.
+First, preview what the script will do:
+
+```bash
+bash <(curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/sciexp/typescript-nix-template/main/scripts/bootstrap.sh) --dry-run
+```
+
+Once you're comfortable with the actions it will take, remove `--dry-run` to execute.
+Use `--help` to see all options including `--yes` for non-interactive mode.
+
+<details>
+<summary>Manual bootstrap</summary>
+
+Alternatively, clone first and use Make targets:
+
+```bash
+git clone https://github.com/sciexp/typescript-nix-template.git
+cd typescript-nix-template
+
+# On macOS: install Xcode CLI tools and Homebrew
+make bootstrap-prep-darwin
+
+# Install Nix and direnv
+make bootstrap
+
+# Verify and generate secrets key
+make verify
+make setup-user
+```
+
+</details>
+
+### Setup (Nix already installed)
+
+```bash
+git clone https://github.com/sciexp/typescript-nix-template.git
+cd typescript-nix-template
+nix develop
+bun install
+```
+
 ## Template usage
 
 You can use [omnix](https://omnix.page/om/init.html)[^omnix] to initialize this template:
@@ -155,51 +200,6 @@ typescript-nix-template/
 ```
 
 </details>
-
-## Prerequisites
-
-### Quick start (one-liner)
-
-Install Nix, direnv, and generate secrets keys with a single command.
-First, preview what the script will do:
-
-```bash
-bash <(curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/sciexp/typescript-nix-template/main/scripts/bootstrap.sh) --dry-run
-```
-
-Once you're comfortable with the actions it will take, remove `--dry-run` to execute.
-Use `--help` to see all options including `--yes` for non-interactive mode.
-
-<details>
-<summary>Manual bootstrap</summary>
-
-Alternatively, clone first and use Make targets:
-
-```bash
-git clone https://github.com/sciexp/typescript-nix-template.git
-cd typescript-nix-template
-
-# On macOS: install Xcode CLI tools and Homebrew
-make bootstrap-prep-darwin
-
-# Install Nix and direnv
-make bootstrap
-
-# Verify and generate secrets key
-make verify
-make setup-user
-```
-
-</details>
-
-### Setup (Nix already installed)
-
-```bash
-git clone https://github.com/sciexp/typescript-nix-template.git
-cd typescript-nix-template
-nix develop
-bun install
-```
 
 ## Nix architecture
 
