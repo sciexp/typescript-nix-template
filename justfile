@@ -478,7 +478,7 @@ docs-deploy-production:
       echo "Building..."
       bun run build
       echo "Deploying to production..."
-      bunx wrangler deploy --message "$DEPLOYMENT_MESSAGE"
+      bunx wrangler deploy
     '
 
     echo ""
