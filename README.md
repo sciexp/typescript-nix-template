@@ -41,37 +41,41 @@ typescript-nix-template/
 
 ## Getting started
 
-### Bootstrap (first time)
+### Quick start (one-liner)
 
-If you don't have Nix installed, the Makefile provides bootstrap commands that work without any dependencies:
+Install Nix, direnv, and generate secrets keys with a single command:
 
 ```bash
-# Clone the repository
+bash <(curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/sciexp/typescript-nix-template/main/scripts/bootstrap.sh)
+```
+
+Options: `--dry-run` to preview, `--yes` for non-interactive, `--help` for all options.
+
+### Manual bootstrap
+
+Alternatively, clone first and use Make targets:
+
+```bash
 git clone https://github.com/sciexp/typescript-nix-template.git
 cd typescript-nix-template
 
-# On macOS: install Xcode CLI tools and Homebrew first
+# On macOS: install Xcode CLI tools and Homebrew
 make bootstrap-prep-darwin
 
 # Install Nix and direnv
 make bootstrap
 
-# Start a new shell, then verify installation
+# Verify and generate secrets key
 make verify
-
-# Generate age key for secrets (first time only)
 make setup-user
 ```
 
 ### Setup (Nix already installed)
 
 ```bash
-# Clone and enter development shell
 git clone https://github.com/sciexp/typescript-nix-template.git
 cd typescript-nix-template
 nix develop
-
-# Install dependencies
 bun install
 ```
 
