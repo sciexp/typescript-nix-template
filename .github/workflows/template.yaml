@@ -8,6 +8,11 @@ on:
         required: true
         type: boolean
         default: false
+      force_run:
+        description: "Force execution even if already successful for this commit"
+        required: false
+        type: boolean
+        default: false
   pull_request:
     types: [opened, labeled, reopened, synchronize]
     paths-ignore:
@@ -38,6 +43,8 @@ permissions:
   actions: write
 
 jobs:
+  # job 1: set-variables
+  # determines workflow settings and variables based on event type
   set-variables:
     runs-on: ubuntu-latest
     outputs:
@@ -81,32 +88,50 @@ jobs:
           echo "checkout_ref=$CHECKOUT_REF" >> $GITHUB_OUTPUT
           echo "checkout_rev=$CHECKOUT_REV" >> $GITHUB_OUTPUT
 
+  # job 2: test-omnix-template
+  # validates omnix template instantiation for both full and minimal configurations
   test-omnix-template:
     needs: [set-variables]
-    if: ${{ needs.set-variables.outputs.skip_ci != 'true' }}
     runs-on: ubuntu-latest
+    if: |
+      !cancelled() &&
+      needs.set-variables.outputs.skip_ci != 'true'
     concurrency:
       group: test-omnix-template-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
       cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check execution cache
+        id: cache
+        uses: ./.github/actions/cached-ci-job
+        with:
+          hash-sources: 'flake.nix flake.lock template/**/* .github/workflows/template.yaml .github/actions/setup-nix/action.yml'
+          force-run: ${{ inputs.force_run || 'false' }}
 
       - name: Setup Nix
+        if: steps.cache.outputs.should-run == 'true'
         uses: ./.github/actions/setup-nix
         with:
-          installer: quick
+          installer: full
           system: x86_64-linux
-          enable-cachix: false
+          enable-cachix: true
+          cachix-name: ${{ vars.CACHIX_CACHE_NAME }}
+          cachix-auth-token: ${{ secrets.CACHIX_AUTH_TOKEN }}
 
       - name: Setup tmate debug session
+        if: steps.cache.outputs.should-run == 'true' && needs.set-variables.outputs.debug == 'true'
         uses: mxschmitt/action-tmate@e5c7151931ca95bad1c6f4190c730ecf8c7dde48 # ratchet:mxschmitt/action-tmate@v3
-        if: ${{ needs.set-variables.outputs.debug == 'true' }}
 
       - name: Install omnix
+        if: steps.cache.outputs.should-run == 'true'
         run: nix --accept-flake-config profile install "github:juspay/omnix/v1.3.0"
 
       - name: Test full template (docs=true)
+        if: steps.cache.outputs.should-run == 'true'
         run: |
           REPO_REF="github:sciexp/typescript-nix-template/${{ needs.set-variables.outputs.checkout_rev }}"
           echo "Using repository reference: $REPO_REF"
@@ -143,6 +168,7 @@ jobs:
           nix flake check --accept-flake-config
 
       - name: Test minimal template (docs=false)
+        if: steps.cache.outputs.should-run == 'true'
         run: |
           REPO_REF="github:sciexp/typescript-nix-template/${{ needs.set-variables.outputs.checkout_rev }}"
           echo "Using repository reference: $REPO_REF"
@@ -177,3 +203,25 @@ jobs:
 
           # Run nix flake check to validate the instantiated template
           nix flake check --accept-flake-config
+
+      - name: Create job result marker
+        if: success() && steps.cache.outputs.should-run == 'true' && steps.cache.outputs.cache-source == 'none'
+        shell: bash
+        run: |
+          mkdir -p "${{ steps.cache.outputs.cache-path }}"
+          cat > "${{ steps.cache.outputs.cache-path }}/marker" <<EOF
+          {
+            "success": true,
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "run_id": "${{ github.run_id }}",
+            "run_attempt": "${{ github.run_attempt }}"
+          }
+          EOF
+
+      - name: Save execution cache
+        if: success() && steps.cache.outputs.should-run == 'true' && steps.cache.outputs.cache-source == 'none'
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # ratchet:actions/cache/save@v4
+        with:
+          path: ${{ steps.cache.outputs.cache-path }}
+          key: ${{ steps.cache.outputs.cache-key }}
