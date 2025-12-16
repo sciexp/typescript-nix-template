@@ -243,7 +243,119 @@ jobs:
           # Run full nix flake check
           nix develop --accept-flake-config -c just check
 
-  # job 4: nix
+      - name: Create job result marker
+        if: success() && steps.cache.outputs.should-run == 'true' && steps.cache.outputs.cache-source == 'none'
+        shell: bash
+        run: |
+          mkdir -p "${{ steps.cache.outputs.cache-path }}"
+          cat > "${{ steps.cache.outputs.cache-path }}/marker" <<EOF
+          {
+            "success": true,
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "run_id": "${{ github.run_id }}",
+            "run_attempt": "${{ github.run_attempt }}"
+          }
+          EOF
+
+      - name: Save execution cache
+        if: success() && steps.cache.outputs.should-run == 'true' && steps.cache.outputs.cache-source == 'none'
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # ratchet:actions/cache/save@v4
+        with:
+          path: ${{ steps.cache.outputs.cache-path }}
+          key: ${{ steps.cache.outputs.cache-key }}
+
+  # job 4: bootstrap-verification
+  # validates Makefile bootstrap workflow on clean ubuntu system
+  bootstrap-verification:
+    needs: [secrets-scan, set-variables]
+    runs-on: ubuntu-latest
+    if: |
+      !cancelled() &&
+      needs.secrets-scan.result == 'success' &&
+      (github.event_name != 'workflow_dispatch' ||
+       inputs.job == '' ||
+       inputs.job == 'bootstrap-verification')
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check execution cache
+        id: cache
+        uses: ./.github/actions/cached-ci-job
+        with:
+          check-name: ${{ github.job }}
+          hash-sources: 'Makefile .envrc .github/actions/setup-nix/action.yml'
+          force-run: ${{ inputs.force_run || 'false' }}
+
+      - name: run make bootstrap
+        if: steps.cache.outputs.should-run == 'true'
+        run: make bootstrap
+
+      - name: verify nix installed
+        if: steps.cache.outputs.should-run == 'true'
+        run: |
+          if ! command -v nix &> /dev/null; then
+            echo "nix not found in PATH"
+            exit 1
+          fi
+          echo "nix found at: $(command -v nix)"
+          echo "nix store path: $(readlink -f $(which nix))"
+          nix --version
+
+      - name: verify direnv configured
+        if: steps.cache.outputs.should-run == 'true'
+        run: |
+          if ! command -v direnv &> /dev/null; then
+            echo "direnv not found in PATH"
+            exit 1
+          fi
+          echo "direnv found at: $(command -v direnv)"
+
+      - name: run make verify
+        if: steps.cache.outputs.should-run == 'true'
+        run: make verify
+
+      - name: run make setup-user
+        if: steps.cache.outputs.should-run == 'true'
+        run: make setup-user
+
+      - name: verify age key generated
+        if: steps.cache.outputs.should-run == 'true'
+        run: |
+          if [ ! -f ~/.config/sops/age/keys.txt ]; then
+            echo "age key not generated"
+            exit 1
+          fi
+          echo "age key generated successfully"
+          . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh && \
+          nix shell nixpkgs#age -c age-keygen -y ~/.config/sops/age/keys.txt
+
+      - name: Create job result marker
+        if: success() && steps.cache.outputs.should-run == 'true' && steps.cache.outputs.cache-source == 'none'
+        shell: bash
+        run: |
+          mkdir -p "${{ steps.cache.outputs.cache-path }}"
+          cat > "${{ steps.cache.outputs.cache-path }}/marker" <<EOF
+          {
+            "success": true,
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "commit": "${{ github.sha }}",
+            "run_id": "${{ github.run_id }}",
+            "run_attempt": "${{ github.run_attempt }}"
+          }
+          EOF
+
+      - name: Save execution cache
+        if: success() && steps.cache.outputs.should-run == 'true' && steps.cache.outputs.cache-source == 'none'
+        uses: actions/cache/save@5a3ec84eff668545956fd18022155c47e93e2684 # ratchet:actions/cache/save@v4
+        with:
+          path: ${{ steps.cache.outputs.cache-path }}
+          key: ${{ steps.cache.outputs.cache-key }}
+
+  # job 5: nix
   # builds flake outputs via category-based matrix for disk space optimization
   # distributes builds across multiple machines to avoid disk space exhaustion
   # each job builds a specific category (packages, checks, devshells)
@@ -315,7 +427,7 @@ jobs:
         if: always()
         run: df -h
 
-  # job 5: test
+  # job 6: test
   # Note: Reusable workflow calls cannot use composite action steps directly
   # Per-matrix-element caching happens via GitHub Checks API based on job name: test (package-name)
   test:
@@ -339,7 +451,7 @@ jobs:
     secrets:
       SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
 
-  # job 6: preview-release-version
+  # job 7: preview-release-version
   # Preview semantic-release version for each package (PR only, fast feedback)
   preview-release-version:
     needs: [set-variables]
@@ -403,7 +515,7 @@ jobs:
             echo "::notice title=Next Version (${{ matrix.package.name }})::No release pending"
           fi
 
-  # job 7: preview-docs-deploy
+  # job 8: preview-docs-deploy
   # Deploy docs to preview environment (PR only, fast feedback)
   preview-docs-deploy:
     needs: [set-variables]
@@ -420,7 +532,7 @@ jobs:
       debug_enabled: ${{ needs.set-variables.outputs.debug }}
     secrets: inherit
 
-  # job 8: production-release-packages
+  # job 9: production-release-packages
   # Release packages to production on main/beta branches
   # Requires test+nix success/skipped (safe for fast-forward merge)
   production-release-packages:
@@ -447,7 +559,7 @@ jobs:
     secrets:
       SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
 
-  # job 9: production-docs-deploy
+  # job 10: production-docs-deploy
   # Documentation deployment to production (conditional)
   # Depends on production-release-packages to ensure packages released first
   production-docs-deploy:
