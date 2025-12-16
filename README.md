@@ -7,6 +7,115 @@ TypeScript project template with Nix flake-parts, Bun workspaces, and semantic-r
 This is a monorepo workspace combining TypeScript packages with a Nix flake that uses deferred module composition via import-tree.
 The architecture provides reproducible development environments, unified formatting with treefmt-nix, and comprehensive testing including nix-unit tests for flake validation.
 
+## Template usage
+
+You can use [omnix](https://omnix.page/om/init.html)[^omnix] to initialize this template:
+
+```sh
+nix --accept-flake-config run github:juspay/omnix -- \
+  init github:sciexp/typescript-nix-template -o my-project
+```
+
+[^omnix]: If you have omnix installed you just need `om init ...` and not `nix run ... -- init`
+
+You can run `direnv allow` to enter the shell environment that contains development dependencies or `nix develop` to enter (or add `-c command` to execute individual commands within) the development shell.
+
+<details><summary>Instantiate with full parameters</summary>
+
+```sh
+PROJECT_DIRECTORY=my-project && \
+PARAMS=$(cat <<EOF
+{
+  "project-name": "$PROJECT_DIRECTORY",
+  "npm-scope": "@$PROJECT_DIRECTORY",
+  "git-org": "myorg",
+  "author": "Your Name",
+  "author-email": "you@example.com",
+  "project-description": "My TypeScript project with Nix",
+  "cloudflare-worker-name": "my-project-docs",
+  "production-url": "my-project.example.com",
+  "github-ci": true,
+  "vscode": true,
+  "docs": true,
+  "nix-template": false
+}
+EOF
+) && \
+nix --accept-flake-config run github:juspay/omnix/v1.3.0 -- \
+  init github:sciexp/typescript-nix-template/main \
+  -o "$PROJECT_DIRECTORY" --non-interactive --params "$PARAMS" && \
+cd "$PROJECT_DIRECTORY" && \
+git init && \
+git commit --allow-empty -m "initial commit (empty)" && \
+git add . && \
+direnv allow && \
+bun install && \
+bun test
+```
+
+</details>
+
+<details><summary>Instantiate without docs (minimal)</summary>
+
+For projects that do not need a documentation site or Cloudflare deployment:
+
+```sh
+PROJECT_DIRECTORY=my-project && \
+PARAMS=$(cat <<EOF
+{
+  "project-name": "$PROJECT_DIRECTORY",
+  "npm-scope": "@$PROJECT_DIRECTORY",
+  "git-org": "myorg",
+  "author": "Your Name",
+  "author-email": "you@example.com",
+  "project-description": "My TypeScript project with Nix",
+  "cloudflare-worker-name": "",
+  "production-url": "",
+  "github-ci": true,
+  "vscode": true,
+  "docs": false,
+  "nix-template": false
+}
+EOF
+) && \
+nix --accept-flake-config run github:juspay/omnix/v1.3.0 -- \
+  init github:sciexp/typescript-nix-template/main \
+  -o "$PROJECT_DIRECTORY" --non-interactive --params "$PARAMS" && \
+cd "$PROJECT_DIRECTORY" && \
+git init && \
+git commit --allow-empty -m "initial commit (empty)" && \
+git add . && \
+direnv allow && \
+bun install && \
+bun test
+```
+
+</details>
+
+You may want to update the git ref/rev of the template if you need to pin to a particular version:
+
+- `github:sciexp/typescript-nix-template/main`
+- `github:sciexp/typescript-nix-template/v0.1.0`
+- `github:sciexp/typescript-nix-template/3289dla`
+- `github:sciexp/typescript-nix-template/devbranch`
+
+### Template parameters
+
+| Parameter | Description |
+| :-------- | :---------- |
+| `project-name` | Project/repository name (kebab-case) |
+| `npm-scope` | npm package scope (include the `@` prefix) |
+| `git-org` | GitHub organization or username |
+| `author` | Package author name |
+| `author-email` | Package author email |
+| `project-description` | Short description of the project |
+| `cloudflare-worker-name` | Cloudflare Pages worker identifier (empty string if `docs: false`) |
+| `production-url` | Production domain for docs site (empty string if `docs: false`) |
+| `github-ci` | Enable GitHub Actions workflows |
+| `vscode` | Include VS Code workspace configuration |
+| `docs` | Include Astro Starlight documentation site |
+| `nix-template` | Include template.nix for re-templating capability |
+
 ## Packages
 
 - **[@typescript-nix-template/docs](./packages/docs)**: Astro Starlight documentation site [![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
