@@ -913,11 +913,11 @@ template-verify:
   # to use omnix binary cache (https://cache.nixos.asia/oss) and avoid recompilation
   if command -v om &> /dev/null; then
     echo "Using installed om command"
-    om init -t "$FLAKE_DIR#default" "$TEMP_DIR/test-project"
+    om init "$FLAKE_DIR#default" -o "$TEMP_DIR/test-project"
   else
     echo "om not found, using nix run (fetching from cache.nixos.asia)"
     nix --accept-flake-config run github:juspay/omnix/v1.3.0 -- \
-      init -t "$FLAKE_DIR#default" "$TEMP_DIR/test-project"
+      init "$FLAKE_DIR#default" -o "$TEMP_DIR/test-project"
   fi
 
   cd "$TEMP_DIR/test-project"
