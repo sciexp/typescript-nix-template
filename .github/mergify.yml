@@ -90,7 +90,7 @@ queue_rules:
     update_method: rebase
     update_bot_account: cameronraysmith
     batch_size: 1
-    checks_timeout: 3600
+    checks_timeout: 1 h
     queue_conditions:
       - -conflict
     merge_conditions:
@@ -103,7 +103,7 @@ queue_rules:
     update_bot_account: cameronraysmith
     batch_size: 10
     batch_max_wait_time: 5 min
-    checks_timeout: 3600
+    checks_timeout: 1 h
     queue_conditions:
       - -conflict
     merge_conditions:
