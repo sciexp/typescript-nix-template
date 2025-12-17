@@ -1,5 +1,6 @@
 # https://github.com/github-linguist/linguist/blob/master/docs/overrides.md
-scripts/*.sh linguist-vendored
-.envrc linguist-vendored
-justfile linguist-documentation
+scripts/** linguist-detectable=false
+.envrc linguist-detectable=false
+justfile linguist-detectable=false
+Makefile linguist-detectable=false
 
