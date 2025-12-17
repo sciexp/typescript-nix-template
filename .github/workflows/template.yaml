@@ -34,6 +34,10 @@ on:
       - "!package.json"
       - "!bun.lock"
 
+concurrency:
+  group: template-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: bash
@@ -96,9 +100,6 @@ jobs:
     if: |
       !cancelled() &&
       needs.set-variables.outputs.skip_ci != 'true'
-    concurrency:
-      group: test-omnix-template-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref_name }}
-      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # ratchet:actions/checkout@v4
