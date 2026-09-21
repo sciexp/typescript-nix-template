@@ -141,11 +141,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1764677445,
-        "narHash": "sha256-TKpMwDUR6dJ3JG0Ypw9y/tIiZbqEVnzGWbsqZRMoqgs=",
+        "lastModified": 1784052475,
+        "narHash": "sha256-FT8xTw9k8nRxb/E9r2aVvOvAewR+hovP95gsioQz9p8=",
         "owner": "pietdevries94",
         "repo": "playwright-web-flake",
-        "rev": "276c607189273ab3b4a3e163fed738bef7f18a7c",
+        "rev": "443f450ea39a6e04ab5125d74a59efd2ed64b0df",
         "type": "github"
       },
       "original": {
